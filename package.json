@@ -1,0 +1,30 @@
+{
+  "name": "axon",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Axon - multi-tenant WhatsApp AI chatbot platform (NestJS + React)",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "dev": "concurrently -n server,web -c cyan,magenta \"npm run dev -w server\" \"npm run dev -w web\"",
+    "build": "npm run build -w server && npm run build -w web",
+    "start": "npm run start:prod -w server",
+    "prisma:generate": "npm run prisma:generate -w server",
+    "prisma:migrate": "npm run prisma:migrate -w server",
+    "prisma:studio": "npm run prisma:studio -w server",
+    "seed": "npm run seed -w server",
+    "docker:build": "docker build -t axon:latest .",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f app"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
