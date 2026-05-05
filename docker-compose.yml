@@ -1,0 +1,97 @@
+name: axon
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-axon}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-axon}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - axon
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-axon}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # Uncomment to reach Postgres from the host:
+    # ports:
+    #   - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    networks:
+      - axon
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      # Bound to loopback: Caddy is the only public entrance. Change to
+      # "${APP_PORT:-6002}:6002" if you want to reach it directly from the LAN.
+      - '127.0.0.1:${APP_PORT:-6002}:6002'
+    environment:
+      NODE_ENV: production
+      PORT: '6002'
+
+      DATABASE_URL: postgresql://${POSTGRES_USER:-axon}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-axon}
+      DB_HOST: postgres
+      DB_PORT: '5432'
+      DB_USER: ${POSTGRES_USER:-axon}
+
+      # Public origin - used for webhook URLs and invitation links.
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:6002}
+      APP_NAME: ${APP_NAME:-Axon}
+
+      # Pin both in production. The entrypoint generates ephemeral values when
+      # they are absent, which invalidates sessions and stored credentials on
+      # every restart.
+      JWT_SECRET: ${JWT_SECRET:-}
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+      JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-30}
+
+      # Optional - without it, AI steps fall back to the flow's message.
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+
+      ENABLE_REDIS: 'true'
+      REDIS_URL: redis://redis:6379
+
+      THROTTLE_LIMIT: ${THROTTLE_LIMIT:-240}
+      THROTTLE_TTL: ${THROTTLE_TTL:-60}
+      SIGNUPS_ENABLED: ${SIGNUPS_ENABLED:-true}
+      UPGRADE_COUPON: ${UPGRADE_COUPON:-Yash@0110}
+
+      SEED_ON_START: ${SEED_ON_START:-true}
+      DEMO_EMAIL: ${DEMO_EMAIL:-demo@axon.app}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-demo1234}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - axon
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  axon:
+    driver: bridge
