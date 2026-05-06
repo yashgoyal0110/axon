@@ -1,0 +1,199 @@
+// Axon - multi-tenant WhatsApp AI chatbot platform
+// Every business object hangs off an Organization (the tenant boundary).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy & identity
+// ---------------------------------------------------------------------------
+
+enum Plan {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum PlanStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  TRIALING
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  AGENT
+  VIEWER
+}
+
+model Organization {
+  id           String     @id @default(cuid())
+  name         String
+  slug         String     @unique
+  billingEmail String?
+  plan         Plan       @default(FREE)
+  planStatus   PlanStatus @default(TRIALING)
+  trialEndsAt  DateTime?
+  // Denormalized settings blob: branding, default AI persona, timezone…
+  settings     Json       @default("{}")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  memberships   Membership[]
+  invitations   Invitation[]
+  flows         Flow[]
+  channels      Channel[]
+  contacts      Contact[]
+  conversations Conversation[]
+  messages      Message[]
+  apiKeys       ApiKey[]
+  usage         UsageRecord[]
+  dailyStats    DailyStat[]
+  auditLogs     AuditLog[]
+
+  @@index([plan])
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  avatarUrl    String?
+  isSuperAdmin Boolean   @default(false)
+  emailVerified Boolean  @default(false)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  memberships   Membership[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+  createdFlows  Flow[]         @relation("FlowCreatedBy")
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  orgId     String
+  role      Role     @default(OWNER)
+  createdAt DateTime @default(now())
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, orgId])
+  @@index([orgId])
+}
+
+model Invitation {
+  id         String    @id @default(cuid())
+  orgId      String
+  email      String
+  role       Role      @default(AGENT)
+  token      String    @unique
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, email])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  ip        String?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  orgId      String
+  name       String
+  prefix     String    @unique
+  keyHash    String
+  scopes     String[]  @default([])
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+}
+
+// ---------------------------------------------------------------------------
+// Flows
+// ---------------------------------------------------------------------------
+
+enum FlowStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Flow {
+  id              String     @id @default(cuid())
+  orgId           String
+  name            String
+  description     String?
+  status          FlowStatus @default(DRAFT)
+  version         Int        @default(1)
+  // React Flow graph: { nodes: [], edges: [] }
+  graph           Json       @default("{\"nodes\":[],\"edges\":[]}")
+  triggerKeywords String[]   @default([])
+  aiEnabled       Boolean    @default(true)
+  aiPersona       String?
+  fallbackMessage String     @default("Sorry, I didn't quite catch that. Could you rephrase?")
+  isDefault       Boolean    @default(false)
+  publishedAt     DateTime?
+  createdById     String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  org           Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdBy     User?          @relation("FlowCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  versions      FlowVersion[]
+  channels      Channel[]
+  conversations Conversation[]
+
+  @@index([orgId, status])
+}
+
+model FlowVersion {
+  id        String   @id @default(cuid())
+  flowId    String
+  version   Int
+  graph     Json
+  notes     String?
+  createdAt DateTime @default(now())
+
+  flow Flow @relation(fields: [flowId], references: [id], onDelete: Cascade)
+
+  @@unique([flowId, version])
+}
+
+// ---------------------------------------------------------------------------
+// Channels - the WhatsApp connection (or the credential-free sandbox)
+// ---------------------------------------------------------------------------
+
+// TODO: second half of this comes with the next chunk of work
