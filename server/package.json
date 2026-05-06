@@ -1,0 +1,49 @@
+{
+  "name": "@axon/server",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Axon API - NestJS",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "nest start --watch",
+    "build": "prisma generate && nest build",
+    "start:prod": "node dist/main.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:push": "prisma db push",
+    "prisma:studio": "prisma studio",
+    "seed": "tsx prisma/seed.ts",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.12",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.0.12",
+    "@nestjs/jwt": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.12",
+    "@nestjs/schedule": "^5.0.1",
+    "@nestjs/serve-static": "^5.0.3",
+    "@nestjs/swagger": "^11.0.7",
+    "@nestjs/throttler": "^6.4.0",
+    "@prisma/client": "^6.5.0",
+    "bcryptjs": "^3.0.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.6.0",
+    "nanoid": "^3.3.8",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.5",
+    "@nestjs/schematics": "^11.0.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.14",
+    "prisma": "^6.5.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
