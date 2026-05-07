@@ -41,4 +41,23 @@ fi
 # --- 3. Apply the schema ------------------------------------------------------
 cd /app/server
 
-# TODO: rest of this module is still being wired up
+# `migrate deploy` when migrations are committed, `db push` otherwise, so a
+# fresh clone comes up without anyone having to author a migration first.
+if [ -d "prisma/migrations" ] && [ -n "$(ls -A prisma/migrations 2>/dev/null)" ]; then
+  echo "==> Applying migrations…"
+  npx prisma migrate deploy
+else
+  echo "==> No migrations found - syncing the schema directly…"
+  npx prisma db push --skip-generate --accept-data-loss
+fi
+
+# --- 4. Seed (idempotent) -----------------------------------------------------
+if [ "${SEED_ON_START:-true}" = "true" ]; then
+  echo "==> Seeding…"
+  npx tsx prisma/seed.ts || echo "WARN: seeding failed - continuing anyway."
+fi
+
+# --- 5. Start -----------------------------------------------------------------
+cd /app
+echo "==> Starting Axon on port ${PORT:-6002}"
+exec node server/dist/main.js
