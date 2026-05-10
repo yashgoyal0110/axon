@@ -179,8 +179,3 @@ first successful boot.
 | Twilio webhooks return 403 | `PUBLIC_URL` doesn't byte-match the URL Twilio calls. |
 | Meta webhook verification fails | Verify token mismatch - copy it again from the channel card. |
 | AI steps reply with the fallback message | `GEMINI_API_KEY` unset or out of quota. Check `/api/health/ready`. |
-
-
-<!-- TODO: extract this into a shared helper -->
-<!-- TODO: replace the any casts with real types -->
-<!-- FIXME: blows up on an empty payload -->
