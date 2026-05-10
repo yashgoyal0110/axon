@@ -196,4 +196,196 @@ model FlowVersion {
 // Channels - the WhatsApp connection (or the credential-free sandbox)
 // ---------------------------------------------------------------------------
 
-// TODO: second half of this comes with the next chunk of work
+enum ChannelProvider {
+  SANDBOX
+  META_CLOUD
+  TWILIO
+}
+
+enum ChannelStatus {
+  PENDING
+  ACTIVE
+  DISABLED
+  ERROR
+}
+
+model Channel {
+  id           String          @id @default(cuid())
+  orgId        String
+  name         String
+  provider     ChannelProvider @default(SANDBOX)
+  status       ChannelStatus   @default(PENDING)
+  phoneNumber  String?
+  // AES-256-GCM encrypted provider credentials (never returned raw by the API)
+  credentials  String?
+  // Public webhook identifier - /api/webhooks/:provider/:webhookId
+  webhookId    String          @unique
+  verifyToken  String?
+  flowId       String?
+  lastErrorAt  DateTime?
+  lastError    String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  org           Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  flow          Flow?          @relation(fields: [flowId], references: [id], onDelete: SetNull)
+  conversations Conversation[]
+  messages      Message[]
+
+  @@index([orgId])
+}
+
+// ---------------------------------------------------------------------------
+// Contacts, conversations, messages
+// ---------------------------------------------------------------------------
+
+model Contact {
+  id         String   @id @default(cuid())
+  orgId      String
+  waId       String
+  name       String?
+  attributes Json     @default("{}")
+  tags       String[] @default([])
+  optedOut   Boolean  @default(false)
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  org           Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+
+  @@unique([orgId, waId])
+  @@index([orgId, lastSeenAt])
+}
+
+enum ConversationStatus {
+  ACTIVE
+  COMPLETED
+  ABANDONED
+  HANDOFF
+}
+
+model Conversation {
+  id            String             @id @default(cuid())
+  orgId         String
+  channelId     String
+  contactId     String
+  flowId        String?
+  status        ConversationStatus @default(ACTIVE)
+  currentNodeId String?
+  // Captured answers / computed variables for this session
+  variables     Json               @default("{}")
+  messageCount  Int                @default(0)
+  aiMessageCount Int               @default(0)
+  startedAt     DateTime           @default(now())
+  lastMessageAt DateTime           @default(now())
+  completedAt   DateTime?
+
+  org     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  channel Channel      @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  contact Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  flow    Flow?        @relation(fields: [flowId], references: [id], onDelete: SetNull)
+
+  messages Message[]
+
+  @@index([orgId, status])
+  @@index([orgId, lastMessageAt])
+  @@index([channelId, contactId, status])
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageSource {
+  FLOW
+  AI
+  AGENT
+  SYSTEM
+}
+
+enum MessageStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+model Message {
+  id                String           @id @default(cuid())
+  orgId             String
+  conversationId    String
+  channelId         String
+  direction         MessageDirection
+  source            MessageSource    @default(FLOW)
+  body              String
+  // Interactive button/list payload rendered by the provider adapter
+  payload           Json?
+  nodeId            String?
+  providerMessageId String?
+  status            MessageStatus    @default(QUEUED)
+  error             String?
+  latencyMs         Int?
+  createdAt         DateTime         @default(now())
+
+  org          Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  channel      Channel      @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([orgId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Metering, analytics, audit
+// ---------------------------------------------------------------------------
+
+model UsageRecord {
+  id            String   @id @default(cuid())
+  orgId         String
+  // Billing period, formatted YYYY-MM
+  period        String
+  messagesIn    Int      @default(0)
+  messagesOut   Int      @default(0)
+  aiCalls       Int      @default(0)
+  conversations Int      @default(0)
+  updatedAt     DateTime @updatedAt
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, period])
+}
+
+model DailyStat {
+  id                     String   @id @default(cuid())
+  orgId                  String
+  date                   DateTime @db.Date
+  messagesIn             Int      @default(0)
+  messagesOut            Int      @default(0)
+  conversationsStarted   Int      @default(0)
+  conversationsCompleted Int      @default(0)
+  aiCalls                Int      @default(0)
+  avgLatencyMs           Int      @default(0)
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, date])
+  @@index([orgId, date])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  orgId     String
+  actorId   String?
+  action    String
+  target    String?
+  metadata  Json     @default("{}")
+  ip        String?
+  createdAt DateTime @default(now())
+
+  org   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  actor User?        @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, createdAt])
+}
