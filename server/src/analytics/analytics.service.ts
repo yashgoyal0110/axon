@@ -221,37 +221,37 @@ export class AnalyticsService {
           started,
           completed,
           handoff,
-                    messages,
-                    completionRate: started ? Math.round((completed / started) * 100) : 0,
-                };
-            }),
-        );
-    }
+          messages,
+          completionRate: started ? Math.round((completed / started) * 100) : 0,
+        };
+      }),
+    );
+  }
 
-    /** Channel mix - which connection is carrying the volume. */
-    async channelBreakdown(orgId: string, days = 30) {
-        const from = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-        const channels = await this.prisma.channel.findMany({
-            where: { orgId },
-            select: { id: true, name: true, provider: true, status: true },
-        });
+  /** Channel mix - which connection is carrying the volume. */
+  async channelBreakdown(orgId: string, days = 30) {
+    const from = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    const channels = await this.prisma.channel.findMany({
+      where: { orgId },
+      select: { id: true, name: true, provider: true, status: true },
+    });
 
-        return Promise.all(
-            channels.map(async (channel) => {
-                const [messages, conversations, failed] = await Promise.all([
-                    this.prisma.message.count({ where: { orgId, channelId: channel.id, createdAt: { gte: from } } }),
-                    this.prisma.conversation.count({ where: { orgId, channelId: channel.id, startedAt: { gte: from } } }),
-                    this.prisma.message.count({
-                        where: { orgId, channelId: channel.id, status: 'FAILED', createdAt: { gte: from } },
-                    }),
-                ]);
-                return { ...channel, messages, conversations, failed };
-            }),
-        );
-    }
+    return Promise.all(
+      channels.map(async (channel) => {
+        const [messages, conversations, failed] = await Promise.all([
+          this.prisma.message.count({ where: { orgId, channelId: channel.id, createdAt: { gte: from } } }),
+          this.prisma.conversation.count({ where: { orgId, channelId: channel.id, startedAt: { gte: from } } }),
+          this.prisma.message.count({
+            where: { orgId, channelId: channel.id, status: 'FAILED', createdAt: { gte: from } },
+          }),
+        ]);
+        return { ...channel, messages, conversations, failed };
+      }),
+    );
+  }
 
-    private percentDelta(current: number, previous: number): number {
-        if (!previous) return current > 0 ? 100 : 0;
-        return Math.round(((current - previous) / previous) * 100);
-    }
+  private percentDelta(current: number, previous: number): number {
+    if (!previous) return current > 0 ? 100 : 0;
+    return Math.round(((current - previous) / previous) * 100);
+  }
 }
