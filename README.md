@@ -159,5 +159,111 @@ to paste into the provider console.
 Credentials are validated on save, encrypted with AES-256-GCM before storage,
 and never returned by the API - the UI only reports which fields are populated.
 
-<!-- TODO: second half of this comes with the next chunk of work -->
-<!-- (kept short on purpose while the shape firms up) -->
+---
+
+## Plans and limits
+
+|                    | Sandbox | Starter        | Pro            | Enterprise |
+| ------------------ | ------- | -------------- | -------------- | ---------- |
+| Price              | Free    | $29/mo         | $99/mo         | Custom     |
+| Messages / month   | 250     | 10,000         | 100,000        | Unlimited  |
+| AI replies / month | 10      | 3,000          | 40,000         | Unlimited  |
+| Flows              | 3       | 10             | 50             | Unlimited  |
+| Channels           | 1       | 2              | 10             | Unlimited  |
+| Seats              | 2       | 5              | 25             | Unlimited  |
+| Providers          | Sandbox | + Twilio, Meta | + Twilio, Meta | All        |
+
+Quota checks run before every send and every AI call. When a ceiling is reached
+the outbound message is still written, marked `FAILED` with the reason attached,
+so nothing vanishes silently.
+
+**Rate limits:** 240 req/min per IP globally, 10/min on credential endpoints,
+60/min on the simulator (it can trigger AI calls), 600/min on provider webhooks.
+
+---
+
+## API
+
+Everything the dashboard does is available over HTTP. Authenticate with a bearer
+token from `/api/auth/login`, or a workspace API key.
+
+```bash
+# Create a key in Settings → API keys
+curl https://your-host/api/flows -H "x-api-key: ax_<prefix>_<secret>"
+
+# Push a message through the engine on a sandbox channel
+curl -X POST https://your-host/api/conversations/simulate \
+  -H "x-api-key: ax_<prefix>_<secret>" \
+  -H "content-type: application/json" \
+  -d '{"text":"hello","waId":"+15550000001"}'
+```
+
+Live OpenAPI explorer at **`/api/docs`**.
+
+---
+
+## Configuration
+
+| Variable                          | Default                 | Notes                                                                                       |
+| --------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------- |
+| `PORT`                            | `6002`                  | The single port everything is served on                                                     |
+| `DATABASE_URL`                    | -                       | **Required**                                                                                |
+| `PUBLIC_URL`                      | `http://localhost:6002` | Used for webhook and invite URLs                                                            |
+| `JWT_SECRET`                      | generated               | **Pin this** - otherwise sessions die on restart                                            |
+| `APP_ENCRYPTION_KEY`              | generated               | **Pin this** (64 hex chars) - otherwise stored channel credentials break on restart          |
+| `GEMINI_API_KEY`                  | -                       | Optional. Enables AI replies and flow generation                                             |
+| `GEMINI_MODEL`                    | `gemini-2.5-flash`      |                                                                                             |
+| `ENABLE_REDIS` / `REDIS_URL`      | `true` / compose        | Falls back to in-process caching                                                             |
+| `THROTTLE_LIMIT` / `THROTTLE_TTL` | `240` / `60`            | Global rate limit                                                                            |
+| `SIGNUPS_ENABLED`                 | `true`                  | Set `false` for a closed instance                                                            |
+| `SEED_ON_START`                   | `true`                  | Idempotent demo seed                                                                         |
+| `UPGRADE_COUPON`                  | `Yash@0110`             | Code required to move onto any paid plan. Empty disables upgrades                            |
+
+---
+
+## Project layout
+
+```
+server/                  NestJS API
+  prisma/schema.prisma   Multi-tenant data model
+  prisma/seed.ts         Idempotent demo seed
+  src/
+    auth/                JWT, refresh rotation, RBAC guard
+    orgs/                Members, invitations, API keys, audit
+    flows/               CRUD, versions, templates, AI generation, preview
+    channels/            Provider config, credential encryption, testing
+    messaging/           Provider adapters (Meta, Twilio, Sandbox)
+    engine/              The conversation runtime
+    conversations/       Inbox + the simulator endpoint
+    analytics/           Overview, funnels, per-flow, per-channel
+    billing/             Plans, quotas, metering
+    webhooks/            Signature-verified public inbound
+web/                     React SPA
+  src/components/ui/     Design system
+  src/components/flow/   Canvas nodes + inspector
+  src/pages/marketing/   Landing, product, pricing, templates, docs
+  src/pages/app/         Dashboard, builder, simulator, inbox, analytics…
+Dockerfile               Single image, both halves
+docker-compose.yml       App + Postgres + Redis
+```
+
+---
+
+## Security notes
+
+- Passwords hashed with bcrypt (cost 12); login returns an identical error for
+  unknown-user and wrong-password so it can't be used to enumerate accounts.
+- Access tokens are short-lived; refresh tokens are opaque, hashed at rest, and
+  rotated on every use. Changing a password revokes every other session.
+- Membership is re-checked on every request, so a revoked seat takes effect
+  immediately rather than when the access token expires.
+- Channel credentials are AES-256-GCM encrypted and never returned by the API.
+- Webhook signatures are verified with constant-time comparison.
+- Helmet, CORS locked to `PUBLIC_URL` in production, `trust proxy` for correct
+  client IPs behind a reverse proxy.
+
+---
+
+<div align="center">
+<sub>Not affiliated with WhatsApp or Meta Platforms, Inc.</sub>
+</div>
