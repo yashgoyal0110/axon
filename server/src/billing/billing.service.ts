@@ -11,7 +11,7 @@ export interface QuotaSnapshot {
   plan: PlanDefinition;
   planStatus: PlanStatus;
   trialEndsAt: Date | null;
-  tmpPeriod: string;
+  period: string;
   usage: {
     messagesIn: number;
     messagesOut: number;
@@ -42,9 +42,9 @@ export class BillingService {
     const org = await this.prisma.organization.findUnique({ where: { id: orgId } });
     if (!org) throw new NotFoundException('Workspace not found');
 
-    const tmpPeriod = currentPeriod();
+    const period = currentPeriod();
     const [usage, flows, channels, seats, apiKeys, contacts] = await Promise.all([
-      this.prisma.usageRecord.findUnique({ where: { orgId_period: { orgId, tmpPeriod } } }),
+      this.prisma.usageRecord.findUnique({ where: { orgId_period: { orgId, period } } }),
       this.prisma.flow.count({ where: { orgId, status: { not: 'ARCHIVED' } } }),
       this.prisma.channel.count({ where: { orgId } }),
       this.prisma.membership.count({ where: { orgId } }),
@@ -65,7 +65,7 @@ export class BillingService {
       plan,
       planStatus: org.planStatus,
       trialEndsAt: org.trialEndsAt,
-      tmpPeriod,
+      period,
       usage: {
         messagesIn,
         messagesOut,
@@ -87,11 +87,11 @@ export class BillingService {
 
   /** Increments monthly usage counters. Never throws - metering is best-effort. */
   async meter(orgId: string, unit: MeteredUnit, amount = 1): Promise<void> {
-    const tmpPeriod = currentPeriod();
+    const period = currentPeriod();
     try {
       await this.prisma.usageRecord.upsert({
-        where: { orgId_period: { orgId, tmpPeriod } },
-        create: { orgId, tmpPeriod, [unit]: amount },
+        where: { orgId_period: { orgId, period } },
+        create: { orgId, period, [unit]: amount },
         update: { [unit]: { increment: amount } },
       });
     } catch (error) {
@@ -118,7 +118,7 @@ export class BillingService {
     if (isUnlimited(limit)) return { allowed: true };
 
     const usage = await this.prisma.usageRecord.findUnique({
-      where: { orgId_period: { orgId, tmpPeriod: currentPeriod() } },
+      where: { orgId_period: { orgId, period: currentPeriod() } },
     });
     const total = (usage?.messagesIn ?? 0) + (usage?.messagesOut ?? 0);
     if (total >= limit) {
@@ -135,7 +135,7 @@ export class BillingService {
     if (isUnlimited(limit)) return { allowed: true };
 
     const usage = await this.prisma.usageRecord.findUnique({
-      where: { orgId_period: { orgId, tmpPeriod: currentPeriod() } },
+      where: { orgId_period: { orgId, period: currentPeriod() } },
     });
     if ((usage?.aiCalls ?? 0) >= limit) {
       return { allowed: false, reason: `Monthly AI quota of ${limit.toLocaleString()} reached` };
