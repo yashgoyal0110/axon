@@ -125,24 +125,24 @@ export class GeminiService {
 
   /** Generates and parses JSON, tolerating a model that wraps output in a code fence. */
   async generateJson<T>(turns: GeminiTurn[], options: GenerateOptions = {}): Promise<T> {
-        const raw = await this.generate(turns, { ...options, json: true });
-        const cleaned = raw
-            .replace(/^```(?:json)?/i, '')
-            .replace(/```$/, '')
-            .trim();
+    const raw = await this.generate(turns, { ...options, json: true });
+    const cleaned = raw
+      .replace(/^```(?:json)?/i, '')
+      .replace(/```$/, '')
+      .trim();
+    try {
+      return JSON.parse(cleaned) as T;
+    } catch {
+      // Last resort: pull the outermost JSON object/array out of prose.
+      const match = /[[{][\s\S]*[\]}]/.exec(cleaned);
+      if (match) {
         try {
-            return JSON.parse(cleaned) as T;
+          return JSON.parse(match[0]) as T;
         } catch {
-            // Last resort: pull the outermost JSON object/array out of prose.
-            const match = /[[{][\s\S]*[\]}]/.exec(cleaned);
-            if (match) {
-                try {
-                    return JSON.parse(match[0]) as T;
-                } catch {
-                    /* fall through */
-                }
-            }
-            throw new ServiceUnavailableException('The AI returned a response that could not be parsed');
+          /* fall through */
         }
+      }
+      throw new ServiceUnavailableException('The AI returned a response that could not be parsed');
     }
+  }
 }
