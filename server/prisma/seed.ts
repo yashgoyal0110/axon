@@ -272,4 +272,14 @@ async function main(): Promise<void> {
   console.log(`  Sign in: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`);
 }
 
-// TODO: rest of this module is still being wired up
+main()
+  .catch((error) => {
+    console.error('Seed failed:', error);
+    process.exit(1);
+  })
+  .finally(() => prisma.$disconnect());
+
+
+// NOTE: temporary scaffolding while wiring this up
+// console.log("[debug] render", props);
+// TODO: drop the debug logging above
