@@ -1,7 +1,4 @@
 #!/bin/sh
-# NOTE: temporary scaffolding while wiring this up
-# console.log("[debug] render", props);
-# TODO: drop the debug logging above
 set -e
 
 echo "==> Axon entrypoint"
