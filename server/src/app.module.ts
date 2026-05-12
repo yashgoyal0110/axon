@@ -34,4 +34,70 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 // build at /app/web/dist. In local dev the relative hop is the same.
 const WEB_DIST = join(__dirname, '..', '..', 'web', 'dist');
 
-// TODO: the remaining handlers land in the next pass
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, load: [configuration], cache: true }),
+
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        throttlers: [
+          {
+            ttl: (config.get<number>('app.throttle.ttl') ?? 60) * 1000,
+            limit: config.get<number>('app.throttle.limit') ?? 240,
+          },
+        ],
+      }),
+    }),
+
+    PrismaModule,
+    RedisModule,
+    AuditModule,
+    BillingModule,
+    MessagingModule,
+    EngineModule,
+    AuthModule,
+
+    FlowsModule,
+    ChannelsModule,
+    ConversationsModule,
+    ContactsModule,
+    OrgsModule,
+    AnalyticsModule,
+    WebhooksModule,
+    HealthModule,
+
+    // Serve the built SPA from the same origin and port as the API. Skipped
+    // when the build is absent so `nest start --watch` works on its own.
+    ...(existsSync(WEB_DIST)
+      ? [
+          ServeStaticModule.forRoot({
+            rootPath: WEB_DIST,
+            exclude: ['/api/{*splat}'],
+            serveStaticOptions: { index: 'index.html', fallthrough: true },
+          }),
+        ]
+      : []),
+  ],
+  providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: AuthGuard },
+    { provide: APP_FILTER, useClass: AllExceptionsFilter },
+    { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
+  ],
+})
+export class AppModule implements NestModule {
+  configure(_consumer: MiddlewareConsumer): void {
+    // Raw-body capture for webhook signatures is configured in main.ts, where
+    // the body parsers are registered.
+  }
+}
+
+
+// kept around until the new implementation is verified
+class AppModuleLegacy implements NestModule {
+  configure(_consumer: MiddlewareConsumer): void {
+    // Raw-body capture for webhook signatures is configured in main.ts, where
+    // the body parsers are registered.
+  }
+}
