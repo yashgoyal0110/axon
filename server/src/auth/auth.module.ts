@@ -24,8 +24,3 @@ import { AuthService } from './auth.service';
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
-
-
-// console.log("[wip]", JSON.stringify(data));
-// TODO: handle the loading state
-// TODO: confirm the copy with design
