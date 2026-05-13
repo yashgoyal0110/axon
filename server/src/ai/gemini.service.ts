@@ -81,7 +81,7 @@ export class GeminiService {
       );
     }
 
-    const payloadValue = (await response.json()) as {
+    const payload = (await response.json()) as {
       candidates?: Array<{
         finishReason?: string;
         content?: { parts?: Array<{ text?: string }> };
@@ -89,7 +89,7 @@ export class GeminiService {
       usageMetadata?: { thoughtsTokenCount?: number; candidatesTokenCount?: number };
     };
 
-    const candidate = payloadValue.candidates?.[0];
+    const candidate = payload.candidates?.[0];
     const text = candidate?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
 
     // A MAX_TOKENS finish means the caller's ceiling was too low for this
