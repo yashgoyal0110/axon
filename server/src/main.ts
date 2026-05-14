@@ -27,10 +27,10 @@ async function bootstrap(): Promise<void> {
   // Keep the raw body around for provider webhook signature checks - the
   // parsed object cannot be re-serialised byte-for-byte.
   const rawBodySaver = (req: AuthedRequest, _res: Response, buf: Buffer) => {
-    if (buf?.length) req.rawBody = buf
-  }
-  app.use(express.json({ limit: '2mb', verify: rawBodySaver as never }))
-  app.use(express.urlencoded({ extended: true, limit: '2mb', verify: rawBodySaver as never }))
+    if (buf?.length) req.rawBody = buf;
+  };
+  app.use(express.json({ limit: '2mb', verify: rawBodySaver as never }));
+  app.use(express.urlencoded({ extended: true, limit: '2mb', verify: rawBodySaver as never }));
 
   app.use(
     helmet({
@@ -39,13 +39,13 @@ async function bootstrap(): Promise<void> {
       contentSecurityPolicy: false,
       crossOriginEmbedderPolicy: false,
     }),
-  )
+  );
 
   app.enableCors({
     origin: env === 'production' ? [config.get<string>('app.publicUrl') as string] : true,
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
-  })
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -54,10 +54,10 @@ async function bootstrap(): Promise<void> {
       transform: true,
       transformOptions: { enableImplicitConversion: true },
     }),
-  )
+  );
 
-  app.set('trust proxy', 1)
-  app.enableShutdownHooks()
+  app.set('trust proxy', 1);
+  app.enableShutdownHooks();
 
   const swagger = new DocumentBuilder()
     .setTitle('Axon API')
@@ -65,11 +65,11 @@ async function bootstrap(): Promise<void> {
     .setVersion('2.0.0')
     .addBearerAuth()
     .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'api-key')
-    .build()
+    .build();
   SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, swagger), {
     customSiteTitle: 'Axon API',
     swaggerOptions: { persistAuthorization: true },
-  })
+  });
 
   // SPA history fallback: anything that is not an API route resolves to
   // index.html so client-side routes survive a hard refresh.
