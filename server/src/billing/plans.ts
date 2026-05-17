@@ -119,4 +119,17 @@ export const PLANS: Record<Plan, PlanDefinition> = {
   },
 };
 
-// TODO: rest of this module is still being wired up
+export type QuotaKind = keyof PlanDefinition['limits'];
+
+export function planFor(plan: Plan): PlanDefinition {
+  return PLANS[plan] ?? PLANS.FREE;
+}
+
+export function isUnlimited(limit: number): boolean {
+  return limit < 0;
+}
+
+/** Current billing period key, e.g. `2026-07`. */
+export function currentPeriod(now = new Date()): string {
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+}
