@@ -49,7 +49,7 @@ export class AnalyticsService {
     const to = new Date();
     const from = new Date(to.getTime() - window * 24 * 60 * 60 * 1000);
     // Same-length window immediately before, for period-over-period deltas.
-    const prevFromData = new Date(from.getTime() - window * 24 * 60 * 60 * 1000);
+    const prevFrom = new Date(from.getTime() - window * 24 * 60 * 60 * 1000);
 
     const [
       conversations,
@@ -78,10 +78,10 @@ export class AnalyticsService {
       this.prisma.message.count({ where: { orgId, source: MessageSource.AI, createdAt: { gte: from } } }),
       this.prisma.contact.count({ where: { orgId } }),
       this.prisma.conversation.count({ where: { orgId, status: ConversationStatus.ACTIVE } }),
-      this.prisma.conversation.count({ where: { orgId, startedAt: { gte: prevFromData, lt: from } } }),
-      this.prisma.message.count({ where: { orgId, createdAt: { gte: prevFromData, lt: from } } }),
+      this.prisma.conversation.count({ where: { orgId, startedAt: { gte: prevFrom, lt: from } } }),
+      this.prisma.message.count({ where: { orgId, createdAt: { gte: prevFrom, lt: from } } }),
       this.prisma.conversation.count({
-        where: { orgId, startedAt: { gte: prevFromData, lt: from }, status: ConversationStatus.COMPLETED },
+        where: { orgId, startedAt: { gte: prevFrom, lt: from }, status: ConversationStatus.COMPLETED },
       }),
       this.prisma.message.aggregate({
         where: { orgId, direction: 'OUTBOUND', createdAt: { gte: from }, latencyMs: { not: null } },
