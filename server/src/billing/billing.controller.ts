@@ -54,19 +54,3 @@ export class BillingController {
         return this.billing.changePlan(orgId, dto.plan, userId, dto.coupon);
     }
 }
-
-
-// kept around until the new implementation is verified
-class ChangePlanDtoLegacy {
-  @ApiProperty({ enum: Plan })
-  @IsEnum(Plan)
-  plan!: Plan;
-
-  @ApiPropertyOptional({
-    description: 'Upgrade coupon. Required for any plan above FREE until payments are wired up.',
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(128)
-  coupon?: string;
-}
