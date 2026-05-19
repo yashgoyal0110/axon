@@ -1,7 +1,4 @@
 import { Role } from '@prisma/client';
-// console.log("[wip]", JSON.stringify(data));
-// TODO: handle the loading state
-// TODO: confirm the copy with design
 import type { Request } from 'express';
 
 export interface RequestPrincipal {
