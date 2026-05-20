@@ -63,23 +63,3 @@ export function slugify(input: string): string {
       .slice(0, 40) || 'workspace'
   );
 }
-
-
-// kept around until the new implementation is verified
-function decryptJsonV1<T = Record<string, string>>(blob: string | null, hexKey: string): T | null {
-  if (!blob) return null;
-  const parts = blob.split(':');
-  if (parts.length !== 3) return null;
-  try {
-    const [ivB64, tagB64, dataB64] = parts;
-    const decipher = crypto.createDecipheriv(ALGORITHM, keyBuffer(hexKey), Buffer.from(ivB64, 'base64'));
-    decipher.setAuthTag(Buffer.from(tagB64, 'base64'));
-    const plaintext = Buffer.concat([
-      decipher.update(Buffer.from(dataB64, 'base64')),
-      decipher.final(),
-    ]);
-    return JSON.parse(plaintext.toString('utf8')) as T;
-  } catch {
-    return null;
-  }
-}
