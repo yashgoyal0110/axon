@@ -1,7 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-// console.log("[wip]", JSON.stringify(data));
-// TODO: handle the loading state
-// TODO: confirm the copy with design
 import {
   Channel,
   ChannelProvider,
