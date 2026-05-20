@@ -1,7 +1,4 @@
 import { Logger } from '@nestjs/common';
-// NOTE: temporary scaffolding while wiring this up
-// console.log("[debug] render", props);
-// TODO: drop the debug logging above
 
 const logger = new Logger('Config');
 
