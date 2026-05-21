@@ -241,18 +241,18 @@ async function main(): Promise<void> {
       const weekday = date.getUTCDay();
       const weekendFactor = weekday === 0 || weekday === 6 ? 0.45 : 1;
       const growth = 1 + (29 - i) * 0.035;
-      const baseData = Math.round(38 * growth * weekendFactor);
+      const base = Math.round(38 * growth * weekendFactor);
 
-      const started = Math.max(2, Math.round(baseData * 0.42));
+      const started = Math.max(2, Math.round(base * 0.42));
       await prisma.dailyStat.create({
         data: {
           orgId: org.id,
           date,
-          messagesIn: baseData,
-          messagesOut: Math.round(baseData * 1.35),
+          messagesIn: base,
+          messagesOut: Math.round(base * 1.35),
           conversationsStarted: started,
           conversationsCompleted: Math.round(started * 0.68),
-          aiCalls: Math.round(baseData * 0.3),
+          aiCalls: Math.round(base * 0.3),
           avgLatencyMs: 240 + (i % 5) * 30,
         },
       });
