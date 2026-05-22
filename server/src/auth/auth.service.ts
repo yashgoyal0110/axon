@@ -172,16 +172,16 @@ export class AuthService {
   }
 
   async me(userId: string, orgId: string): Promise<Omit<SessionResponse, 'accessToken' | 'refreshToken' | 'expiresIn'>> {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } })
-    if (!user) throw new NotFoundException('User not found')
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
 
     const memberships = await this.prisma.membership.findMany({
       where: { userId },
       include: { org: true },
       orderBy: { createdAt: 'asc' },
-    })
-    const active = memberships.find((m) => m.orgId === orgId) ?? memberships[0]
-    if (!active) throw new ForbiddenException('No workspace available')
+    });
+    const active = memberships.find((m) => m.orgId === orgId) ?? memberships[0];
+    if (!active) throw new ForbiddenException('No workspace available');
 
     return {
       user: {
@@ -206,7 +206,7 @@ export class AuthService {
         role: m.role,
         plan: m.org.plan,
       })),
-    }
+    };
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
