@@ -33,24 +33,24 @@ export class BillingController {
     return this.billing.listPlans();
   }
 
-    @ApiBearerAuth()
-    @Get('usage')
-    @ApiOperation({ summary: 'Current period usage, quotas and resource counts' })
-    usage(@OrgId() orgId: string) {
-        return this.billing.snapshot(orgId);
-    }
+  @ApiBearerAuth()
+  @Get('usage')
+  @ApiOperation({ summary: 'Current period usage, quotas and resource counts' })
+  usage(@OrgId() orgId: string) {
+    return this.billing.snapshot(orgId);
+  }
 
-    @ApiBearerAuth()
-    @Roles(Role.OWNER)
-    // Tight limit so the upgrade coupon cannot be brute-forced.
-    @Throttle({ default: { limit: 10, ttl: 60_000 } })
-    @Post('plan')
-    @ApiOperation({ summary: 'Change the workspace plan' })
-    changePlan(
-        @OrgId() orgId: string,
-        @Body() dto: ChangePlanDto,
-        @CurrentUser('userId') userId: string,
-    ) {
-        return this.billing.changePlan(orgId, dto.plan, userId, dto.coupon);
-    }
+  @ApiBearerAuth()
+  @Roles(Role.OWNER)
+  // Tight limit so the upgrade coupon cannot be brute-forced.
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('plan')
+  @ApiOperation({ summary: 'Change the workspace plan' })
+  changePlan(
+    @OrgId() orgId: string,
+    @Body() dto: ChangePlanDto,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.billing.changePlan(orgId, dto.plan, userId, dto.coupon);
+  }
 }
