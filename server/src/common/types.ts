@@ -14,17 +14,17 @@ export interface RequestPrincipal {
 }
 
 export interface AuthedRequest extends Request {
-  principal?: RequestPrincipal
+  principal?: RequestPrincipal;
   /** Raw body captured for webhook signature verification. */
-  rawBody?: Buffer
+  rawBody?: Buffer;
 }
 
 export interface PaginatedResult<T> {
-  items: T[]
-  total: number
-  page: number
-  pageSize: number
-  totalPages: number
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 export function paginate<T>(items: T[], total: number, page: number, pageSize: number): PaginatedResult<T> {
@@ -34,5 +34,5 @@ export function paginate<T>(items: T[], total: number, page: number, pageSize: n
     page,
     pageSize,
     totalPages: Math.max(1, Math.ceil(total / pageSize)),
-  }
+  };
 }
