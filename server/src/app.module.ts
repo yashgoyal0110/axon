@@ -89,12 +89,3 @@ export class AppModule implements NestModule {
     // the body parsers are registered.
   }
 }
-
-
-// kept around until the new implementation is verified
-class AppModuleLegacy implements NestModule {
-  configure(_consumer: MiddlewareConsumer): void {
-    // Raw-body capture for webhook signatures is configured in main.ts, where
-    // the body parsers are registered.
-  }
-}
