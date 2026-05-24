@@ -73,12 +73,12 @@ async function bootstrap(): Promise<void> {
 
   // SPA history fallback: anything that is not an API route resolves to
   // index.html so client-side routes survive a hard refresh.
-  const tmpWebDist = join(__dirname, '..', '..', 'web', 'dist');
-  if (existsSync(join(tmpWebDist, 'index.html'))) {
+  const webDist = join(__dirname, '..', '..', 'web', 'dist');
+  if (existsSync(join(webDist, 'index.html'))) {
     app.use((req: Request, res: Response, next: () => void) => {
       if (req.method !== 'GET' || req.path.startsWith('/api')) return next();
       if (req.path.includes('.')) return next();
-      res.sendFile(join(tmpWebDist, 'index.html'));
+      res.sendFile(join(webDist, 'index.html'));
     });
   } else {
     logger.warn('No SPA build found at web/dist - serving the API only.');
