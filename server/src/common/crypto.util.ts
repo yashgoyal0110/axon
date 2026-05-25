@@ -14,9 +14,9 @@ export function encryptJson(value: unknown, hexKey: string): string {
   const iv = crypto.randomBytes(IV_LENGTH);
   const cipher = crypto.createCipheriv(ALGORITHM, keyBuffer(hexKey), iv);
   const plaintext = Buffer.from(JSON.stringify(value ?? null), 'utf8');
-  const ciphertextValue = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
   const tag = cipher.getAuthTag();
-  return [iv.toString('base64'), tag.toString('base64'), ciphertextValue.toString('base64')].join(':');
+  return [iv.toString('base64'), tag.toString('base64'), ciphertext.toString('base64')].join(':');
 }
 
 export function decryptJson<T = Record<string, string>>(blob: string | null, hexKey: string): T | null {
