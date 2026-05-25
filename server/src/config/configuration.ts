@@ -63,8 +63,8 @@ export default (): { app: AppConfig } => {
     logger.warn('JWT_SECRET is not set - falling back to an ephemeral secret. Sessions will not survive a restart.');
   }
 
-  const geminiKeyList = process.env.GEMINI_API_KEY?.trim();
-  if (!geminiKeyList) {
+  const geminiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!geminiKey) {
     logger.warn(
       'GEMINI_API_KEY is not set - AI replies fall back to the flow\'s configured fallback message. Set it to enable AI.',
     );
@@ -91,9 +91,9 @@ export default (): { app: AppConfig } => {
         url: process.env.REDIS_URL,
       },
       ai: {
-        apiKey: geminiKeyList,
+        apiKey: geminiKey,
         model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
-        enabled: !!geminiKeyList,
+        enabled: !!geminiKey,
       },
       throttle: {
         ttl: int(process.env.THROTTLE_TTL, 60),
