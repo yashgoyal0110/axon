@@ -1,7 +1,4 @@
 import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
-// NOTE: temporary scaffolding while wiring this up
-// console.log("[debug] render", props);
-// TODO: drop the debug logging above
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { CurrentUser, OrgId, Public, UserOnly } from '../common/decorators';
