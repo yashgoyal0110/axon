@@ -48,7 +48,7 @@ export class ConversationsService {
     };
 
     const [items, total] = await Promise.all([
-      this.prisma.conversationValue.findMany({
+      this.prisma.conversation.findMany({
         where,
         orderBy: { lastMessageAt: 'desc' },
         skip: (page - 1) * pageSize,
@@ -60,7 +60,7 @@ export class ConversationsService {
           messages: { orderBy: { createdAt: 'desc' }, take: 1, select: { body: true, direction: true, createdAt: true } },
         },
       }),
-      this.prisma.conversationValue.count({ where }),
+      this.prisma.conversation.count({ where }),
     ]);
 
     return paginate(
@@ -72,7 +72,7 @@ export class ConversationsService {
   }
 
   async get(orgId: string, id: string) {
-    const conversationValue = await this.prisma.conversationValue.findFirst({
+    const conversation = await this.prisma.conversation.findFirst({
       where: { id, orgId },
       include: {
         contact: true,
@@ -80,7 +80,7 @@ export class ConversationsService {
         flow: { select: { id: true, name: true, status: true } },
       },
     });
-    if (!conversationValue) throw new NotFoundException('Conversation not found');
+    if (!conversation) throw new NotFoundException('Conversation not found');
 
     const messages = await this.prisma.message.findMany({
       where: { conversationId: id },
@@ -88,16 +88,16 @@ export class ConversationsService {
       take: 500,
     });
 
-    return { ...conversationValue, messages };
+    return { ...conversation, messages };
   }
 
   /** Messages after a cursor - powers the inbox's lightweight live polling. */
   async messagesSince(orgId: string, id: string, since?: string) {
-    const conversationValue = await this.prisma.conversationValue.findFirst({
+    const conversation = await this.prisma.conversation.findFirst({
       where: { id, orgId },
       select: { id: true, status: true, currentNodeId: true },
     });
-    if (!conversationValue) throw new NotFoundException('Conversation not found');
+    if (!conversation) throw new NotFoundException('Conversation not found');
 
     const messages = await this.prisma.message.findMany({
       where: {
@@ -107,28 +107,28 @@ export class ConversationsService {
       orderBy: { createdAt: 'asc' },
       take: 200,
     });
-    return { status: conversationValue.status, currentNodeId: conversationValue.currentNodeId, messages };
+    return { status: conversation.status, currentNodeId: conversation.currentNodeId, messages };
   }
 
   /** A human agent replying inside the shared inbox. */
   async sendAgentMessage(orgId: string, id: string, text: string, userId: string | null) {
     if (!text?.trim()) throw new BadRequestException('Message cannot be empty');
 
-    const conversationValue = await this.prisma.conversationValue.findFirst({
+    const conversation = await this.prisma.conversation.findFirst({
       where: { id, orgId },
       include: { channel: true, contact: true },
     });
-    if (!conversationValue) throw new NotFoundException('Conversation not found');
+    if (!conversation) throw new NotFoundException('Conversation not found');
 
     const result = await this.messaging.dispatch({
-      channel: conversationValue.channel,
-      conversationId: conversationValue.id,
-      to: conversationValue.contact.waId,
+      channel: conversation.channel,
+      conversationId: conversation.id,
+      to: conversation.contact.waId,
       text: text.trim(),
       source: MessageSource.AGENT,
     });
 
-    await this.prisma.conversationValue.update({
+    await this.prisma.conversation.update({
       where: { id },
       data: { lastMessageAt: new Date(), messageCount: { increment: 1 } },
     });
@@ -138,10 +138,10 @@ export class ConversationsService {
   }
 
   async setStatus(orgId: string, id: string, status: ConversationStatus, userId: string | null) {
-    const conversationValue = await this.prisma.conversationValue.findFirst({ where: { id, orgId } });
-    if (!conversationValue) throw new NotFoundException('Conversation not found');
+    const conversation = await this.prisma.conversation.findFirst({ where: { id, orgId } });
+    if (!conversation) throw new NotFoundException('Conversation not found');
 
-    const updated = await this.prisma.conversationValue.update({
+    const updated = await this.prisma.conversation.update({
       where: { id },
       data: {
         status,
@@ -188,7 +188,7 @@ export class ConversationsService {
     const contact = await this.prisma.contact.findUnique({ where: { orgId_waId: { orgId, waId } } });
     if (!contact) return { success: true };
 
-    await this.prisma.conversationValue.updateMany({
+    await this.prisma.conversation.updateMany({
       where: { orgId, contactId: contact.id, status: { in: [ConversationStatus.ACTIVE, ConversationStatus.HANDOFF] } },
       data: { status: ConversationStatus.ABANDONED },
     });
