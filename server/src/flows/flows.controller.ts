@@ -97,50 +97,50 @@ export class FlowsController {
     @OrgId() orgId: string,
     @Param('id') id: string,
     @Param('version', ParseIntPipe) version: number,
-        @CurrentUser('userId') userId: string,
-    ) {
-        return this.flows.restore(orgId, id, version, userId);
-    }
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.flows.restore(orgId, id, version, userId);
+  }
 
-    @ApiBearerAuth()
-    @Roles(Role.AGENT)
-    @Post(':id/duplicate')
-    @ApiOperation({ summary: 'Duplicate a flow' })
-    duplicate(@OrgId() orgId: string, @Param('id') id: string, @CurrentUser('userId') userId: string) {
-        return this.flows.duplicate(orgId, id, userId);
-    }
+  @ApiBearerAuth()
+  @Roles(Role.AGENT)
+  @Post(':id/duplicate')
+  @ApiOperation({ summary: 'Duplicate a flow' })
+  duplicate(@OrgId() orgId: string, @Param('id') id: string, @CurrentUser('userId') userId: string) {
+    return this.flows.duplicate(orgId, id, userId);
+  }
 
-    @ApiBearerAuth()
-    @Roles(Role.ADMIN)
-    @Delete(':id')
-    @ApiOperation({ summary: 'Archive a flow' })
-    remove(@OrgId() orgId: string, @Param('id') id: string, @CurrentUser('userId') userId: string) {
-        return this.flows.remove(orgId, id, userId);
-    }
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @Delete(':id')
+  @ApiOperation({ summary: 'Archive a flow' })
+  remove(@OrgId() orgId: string, @Param('id') id: string, @CurrentUser('userId') userId: string) {
+    return this.flows.remove(orgId, id, userId);
+  }
 
-    @ApiBearerAuth()
-    @Post('validate')
-    @ApiOperation({ summary: 'Validate a graph without saving it' })
-    validate(@Body() body: { graph: unknown }) {
-        return this.flows.validate(body?.graph);
-    }
+  @ApiBearerAuth()
+  @Post('validate')
+  @ApiOperation({ summary: 'Validate a graph without saving it' })
+  validate(@Body() body: { graph: unknown }) {
+    return this.flows.validate(body?.graph);
+  }
 
-    @ApiBearerAuth()
-    @Roles(Role.AGENT)
-    @Post('generate')
-    @ApiOperation({ summary: 'Generate a flow graph from a business description with AI' })
-    generate(@OrgId() orgId: string, @Body() dto: GenerateFlowDto) {
-        return this.flows.generate(orgId, dto);
-    }
+  @ApiBearerAuth()
+  @Roles(Role.AGENT)
+  @Post('generate')
+  @ApiOperation({ summary: 'Generate a flow graph from a business description with AI' })
+  generate(@OrgId() orgId: string, @Body() dto: GenerateFlowDto) {
+    return this.flows.generate(orgId, dto);
+  }
 
-    @ApiBearerAuth()
-    @Post(':id/preview')
-    @ApiOperation({ summary: 'Dry-run a flow without touching real conversations' })
-    preview(
-        @OrgId() orgId: string,
-        @Param('id') id: string,
-        @Body() body: { history?: Array<{ role: 'user' | 'bot'; text: string }>; message: string },
-    ) {
-        return this.flows.preview(orgId, id, body?.history ?? [], body?.message ?? '');
-    }
+  @ApiBearerAuth()
+  @Post(':id/preview')
+  @ApiOperation({ summary: 'Dry-run a flow without touching real conversations' })
+  preview(
+    @OrgId() orgId: string,
+    @Param('id') id: string,
+    @Body() body: { history?: Array<{ role: 'user' | 'bot'; text: string }>; message: string },
+  ) {
+    return this.flows.preview(orgId, id, body?.history ?? [], body?.message ?? '');
+  }
 }
