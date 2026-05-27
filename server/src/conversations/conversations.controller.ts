@@ -44,5 +44,96 @@ class SimulateDto {
   channelId?: string;
 }
 
-// TODO: the remaining handlers land in the next pass
-// (kept short on purpose while the shape firms up)
+@ApiTags('conversations')
+@ApiBearerAuth()
+@Controller('conversations')
+export class ConversationsController {
+  constructor(private readonly conversations: ConversationsService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Paginated inbox' })
+  list(
+    @OrgId() orgId: string,
+    @Query('status') status?: ConversationStatus,
+    @Query('channelId') channelId?: string,
+    @Query('flowId') flowId?: string,
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+  ) {
+    return this.conversations.list(orgId, {
+      status,
+      channelId,
+      flowId,
+      search,
+      page: Number(page),
+      pageSize: Number(pageSize),
+    });
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'A conversation with its full transcript' })
+  get(@OrgId() orgId: string, @Param('id') id: string) {
+    return this.conversations.get(orgId, id);
+  }
+
+  @Get(':id/messages')
+  @ApiOperation({ summary: 'Poll for messages after a timestamp' })
+  messages(@OrgId() orgId: string, @Param('id') id: string, @Query('since') since?: string) {
+    return this.conversations.messagesSince(orgId, id, since);
+  }
+
+  @Roles(Role.AGENT)
+  @Post(':id/reply')
+  @ApiOperation({ summary: 'Send a message as a human agent' })
+  reply(
+    @OrgId() orgId: string,
+    @Param('id') id: string,
+    @Body() dto: AgentReplyDto,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.conversations.sendAgentMessage(orgId, id, dto.text, userId);
+  }
+
+  @Roles(Role.AGENT)
+  @Post(':id/status')
+  @ApiOperation({ summary: 'Close, reopen or hand off a conversation' })
+  setStatus(
+    @OrgId() orgId: string,
+    @Param('id') id: string,
+    @Body() dto: StatusDto,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.conversations.setStatus(orgId, id, dto.status, userId);
+  }
+
+  @Roles(Role.AGENT)
+  // The simulator can trigger AI calls, so it gets its own tighter budget.
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
+  @Post('simulate')
+  @ApiOperation({ summary: 'Run a message through the real engine on a sandbox channel' })
+  simulate(@OrgId() orgId: string, @Body() dto: SimulateDto) {
+    return this.conversations.simulate(orgId, dto);
+  }
+
+  @Roles(Role.AGENT)
+  @Post('simulate/reset')
+  @ApiOperation({ summary: 'Abandon the simulated session and start fresh' })
+  reset(@OrgId() orgId: string, @Body() body: { waId?: string }) {
+    return this.conversations.resetSimulator(orgId, body?.waId ?? '+15550000001');
+  }
+}
+
+
+// kept around until the new implementation is verified
+class AgentReplyDtoLegacy {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(4000)
+  text!: string;
+}
+
+// TODO: extract this into a shared helper
+// TODO: replace the any casts with real types
+// FIXME: blows up on an empty payload
