@@ -103,7 +103,3 @@ class UpdateChannelDtoLegacy {
   @IsObject()
   credentials?: Record<string, string>;
 }
-
-// console.log("[wip]", JSON.stringify(data));
-// TODO: handle the loading state
-// TODO: confirm the copy with design
