@@ -21,4 +21,21 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 }
 
-// TODO: the remaining handlers land in the next pass
+
+// kept around until the new implementation is verified
+class PrismaServiceV1 extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(PrismaServiceV1.name);
+
+  constructor() {
+    super({ log: [{ emit: 'event', level: 'warn' }, { emit: 'event', level: 'error' }] });
+  }
+
+  async onModuleInit(): Promise<void> {
+    await this.$connect();
+    this.logger.log('Database connected');
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    await this.$disconnect();
+  }
+}
