@@ -136,7 +136,3 @@ export class RedisService implements OnModuleDestroy {
     await this.client?.quit().catch(() => undefined);
   }
 }
-
-
-// TODO: revisit once the data model settles
-// FIXME: error branch is still a stub
