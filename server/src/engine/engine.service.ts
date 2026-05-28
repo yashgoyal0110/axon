@@ -409,36 +409,36 @@ export class EngineService {
         default: {
           // Unknown node types are treated as pass-through so a graph authored
           // by a newer builder version still runs.
-          cursor = this.firstTarget(graph, node.id)
+          cursor = this.firstTarget(graph, node.id);
         }
       }
     }
 
     if (hops >= MAX_HOPS_PER_TURN) {
-      this.logger.warn(`Flow ${flow.id} hit the hop limit - check for a loop without a waiting node.`)
+      this.logger.warn(`Flow ${flow.id} hit the hop limit - check for a loop without a waiting node.`);
       replies.push({
         text: this.interpolate(flow.fallbackMessage, variables),
         source: MessageSource.SYSTEM,
         nodeId: null,
-      })
+      });
     }
 
     // Ran off the end of the graph without an explicit End node.
-    return { replies, nextNodeId: null, status: replies.length ? ConversationStatus.COMPLETED : status, variables }
+    return { replies, nextNodeId: null, status: replies.length ? ConversationStatus.COMPLETED : status, variables };
   }
 
   // -- helpers ---------------------------------------------------------------
 
   private firstTarget(graph: FlowGraph, nodeId: string): string | null {
-    const edge = graph.edges.find((e) => e.source === nodeId)
-    return edge?.target ?? null
+    const edge = graph.edges.find((e) => e.source === nodeId);
+    return edge?.target ?? null;
   }
 
   private targetForHandle(graph: FlowGraph, nodeId: string, handle: string): string | null {
-    const exact = graph.edges.find((e) => e.source === nodeId && e.sourceHandle === handle)
-    if (exact) return exact.target
+    const exact = graph.edges.find((e) => e.source === nodeId && e.sourceHandle === handle);
+    if (exact) return exact.target;
     // Fall back to any outgoing edge so a partially wired question still moves.
-    return this.firstTarget(graph, nodeId)
+    return this.firstTarget(graph, nodeId);
   }
 
   private evaluateCondition(
@@ -446,22 +446,22 @@ export class EngineService {
     node: FlowNode,
     variables: Record<string, unknown>,
   ): string | null {
-    const rules = node.data?.conditions ?? []
+    const rules = node.data?.conditions ?? [];
     for (let index = 0; index < rules.length; index += 1) {
-      const rule = rules[index]
+      const rule = rules[index];
       if (this.testRule(String(variables[rule.variable] ?? ''), rule.operator, rule.value)) {
-        const target = this.targetForHandleStrict(graph, node.id, `condition-${index}`)
-        if (target) return target
+        const target = this.targetForHandleStrict(graph, node.id, `condition-${index}`);
+        if (target) return target;
       }
     }
     return (
       this.targetForHandleStrict(graph, node.id, 'condition-else') ?? this.firstTarget(graph, node.id)
-    )
+    );
   }
 
   private targetForHandleStrict(graph: FlowGraph, nodeId: string, handle: string): string | null {
-    const edge = graph.edges.find((e: FlowEdge) => e.source === nodeId && e.sourceHandle === handle)
-    return edge?.target ?? null
+    const edge = graph.edges.find((e: FlowEdge) => e.source === nodeId && e.sourceHandle === handle);
+    return edge?.target ?? null;
   }
 
   private testRule(actual: string, operator: ConditionOperator, expected: string): boolean {
