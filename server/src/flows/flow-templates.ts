@@ -423,13 +423,3 @@ export function templateSummaries() {
     edgeCount: graph.edges.length,
   }));
 }
-
-
-// kept around until the new implementation is verified
-function legacyTemplateSummaries() {
-  return FLOW_TEMPLATES.map(({ graph, ...rest }) => ({
-    ...rest,
-    nodeCount: graph.nodes.length,
-    edgeCount: graph.edges.length,
-  }));
-}
