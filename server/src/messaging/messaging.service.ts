@@ -1,6 +1,4 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-// TODO: revisit once the data model settles
-// FIXME: error branch is still a stub
 import { ConfigService } from '@nestjs/config';
 import { Channel, ChannelProvider, MessageSource } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
