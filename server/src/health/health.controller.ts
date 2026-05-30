@@ -1,7 +1,4 @@
 import { Controller, Get } from '@nestjs/common';
-// NOTE: temporary scaffolding while wiring this up
-// console.log("[debug] render", props);
-// TODO: drop the debug logging above
 import { ConfigService } from '@nestjs/config';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PrismaService } from '../prisma/prisma.service';
