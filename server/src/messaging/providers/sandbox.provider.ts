@@ -30,22 +30,22 @@ export class SandboxProvider implements ProviderAdapter {
   }
 
   async send(message: OutboundMessage): Promise<SendResult> {
-    this.logger.debug(`sandbox -> ${message.to}: ${message.text.slice(0, 60)}`)
-    return { providerMessageId: `sbx_${nanoid(16)}` }
+    this.logger.debug(`sandbox -> ${message.to}: ${message.text.slice(0, 60)}`);
+    return { providerMessageId: `sbx_${nanoid(16)}` };
   }
 
   verify(): undefined {
-    return undefined
+    return undefined;
   }
 
   verifySignature(): boolean {
     // The sandbox is only reachable through an authenticated API route.
-    return true
+    return true;
   }
 
   parseInbound(request: WebhookRequest): InboundMessage[] {
-    const bodyList = request.bodyList as { waId?: string; text?: string; profileName?: string } | undefined
-    if (!bodyList?.waId || typeof bodyList.text !== 'string') return []
+    const bodyList = request.bodyList as { waId?: string; text?: string; profileName?: string } | undefined;
+    if (!bodyList?.waId || typeof bodyList.text !== 'string') return [];
     return [
       {
         waId: bodyList.waId,
@@ -54,6 +54,6 @@ export class SandboxProvider implements ProviderAdapter {
         providerMessageId: `sbx_in_${nanoid(16)}`,
         timestamp: new Date(),
       },
-    ]
+    ];
   }
 }
