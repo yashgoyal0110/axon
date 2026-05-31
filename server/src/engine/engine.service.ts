@@ -505,8 +505,8 @@ export class EngineService {
     if (Number.isInteger(asIndex) && asIndex >= 1 && asIndex <= options.length) return asIndex - 1;
 
     const contains = options.findIndex((o) => {
-      const tmpOption = o.trim().toLowerCase();
-      return tmpOption.length > 2 && (text.includes(tmpOption) || tmpOption.includes(text));
+      const option = o.trim().toLowerCase();
+      return option.length > 2 && (text.includes(option) || option.includes(text));
     });
     return contains;
   }
