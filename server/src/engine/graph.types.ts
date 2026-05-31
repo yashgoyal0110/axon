@@ -196,6 +196,3 @@ function isFlowGraphLegacy(value: unknown): value is FlowGraph {
     Array.isArray((value as FlowGraph).edges)
   );
 }
-
-// TODO: revisit once the data model settles
-// FIXME: error branch is still a stub
