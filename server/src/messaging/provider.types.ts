@@ -44,5 +44,35 @@ export interface ChannelCredentialsMeta {
   businessAccountId?: string
 }
 
-// TODO: finish the error/loading branches below
-// (kept short on purpose while the shape firms up)
+export interface ChannelCredentialsTwilio {
+  accountSid: string
+  authToken: string
+  fromNumber: string
+}
+
+export type ChannelCredentials =
+  | ChannelCredentialsMeta
+  | ChannelCredentialsTwilio
+  | Record<string, never>
+
+export interface ProviderAdapter {
+  readonly provider: ChannelProvider
+  readonly requiresCredentials: boolean
+
+  /** Throws BadRequestException with a field-level message when incomplete. */
+  validateCredentials(credentials: Record<string, unknown>): ChannelCredentials
+
+  /** Fields the settings UI should render, and which are secret. */
+  credentialSchema(): Array<{ key: string; label: string; secret: boolean; required: boolean; help?: string }>
+
+  send(message: OutboundMessage, credentials: ChannelCredentials): Promise<SendResult>
+
+  /** GET handshake (Meta). Returns undefined when the provider has none. */
+  verify(request: WebhookRequest, verifyToken?: string | null): WebhookVerification | undefined
+
+  /** Returns false when a signature header is present but does not match. */
+  verifySignature(request: WebhookRequest, credentials: ChannelCredentials, publicUrl: string): boolean
+
+  /** Extracts zero or more inbound messages from a webhook payload. */
+  parseInbound(request: WebhookRequest): InboundMessage[]
+}
