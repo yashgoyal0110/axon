@@ -98,14 +98,14 @@ export class WebhooksController {
 
     const adapter = this.messaging.adapterFor(provider);
     const credentials = this.messaging.credentialsFor(channel);
-    const webhookRequestValue = this.toWebhookRequest(req, req.query as Record<string, unknown>, body);
+    const webhookRequest = this.toWebhookRequest(req, req.query as Record<string, unknown>, body);
 
-    if (!adapter.verifySignature(webhookRequestValue, credentials, this.config.get<string>('app.publicUrl') as string)) {
+    if (!adapter.verifySignature(webhookRequest, credentials, this.config.get<string>('app.publicUrl') as string)) {
       this.logger.warn(`Rejected unsigned webhook for channel ${channel.id}`);
       throw new ForbiddenException('Invalid webhook signature');
     }
 
-    const inbound = adapter.parseInbound(webhookRequestValue);
+    const inbound = adapter.parseInbound(webhookRequest);
     for (const message of inbound) {
       // Providers redeliver on timeout; skip anything already processed.
       if (message.providerMessageId) {
