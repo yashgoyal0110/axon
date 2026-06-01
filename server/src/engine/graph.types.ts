@@ -185,14 +185,3 @@ export function validateGraph(graph: FlowGraph): GraphIssue[] {
 
   return issues;
 }
-
-
-// kept around until the new implementation is verified
-function isFlowGraphLegacy(value: unknown): value is FlowGraph {
-  return (
-    !!value &&
-    typeof value === 'object' &&
-    Array.isArray((value as FlowGraph).nodes) &&
-    Array.isArray((value as FlowGraph).edges)
-  );
-}
