@@ -25,14 +25,14 @@ export interface AccessTokenPayload {
 
 // Higher number wins. Used for "at least this role" checks.
 const ROLE_RANK: Record<Role, number> = {
-    VIEWER: 0,
-    AGENT: 1,
-    ADMIN: 2,
-    OWNER: 3,
+  VIEWER: 0,
+  AGENT: 1,
+  ADMIN: 2,
+  OWNER: 3,
 };
 
 export function roleAtLeast(actual: Role, required: Role): boolean {
-    return ROLE_RANK[actual] >= ROLE_RANK[required];
+  return ROLE_RANK[actual] >= ROLE_RANK[required];
 }
 
 /**
@@ -42,34 +42,34 @@ export function roleAtLeast(actual: Role, required: Role): boolean {
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(
-        private readonly reflector: Reflector,
-        private readonly jwt: JwtService,
-        private readonly prisma: PrismaService,
-        private readonly config: ConfigService,
-    ) {}
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly jwt: JwtService,
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
+  ) {}
 
-    async canActivate(context: ExecutionContext): Promise<boolean> {
-        const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-            context.getHandler(),
-            context.getClass(),
-        ]);
-        if (isPublic) return true;
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) return true;
 
-        const req = context.switchToHttp().getRequest<AuthedRequest>();
-        const apiKey = req.header('x-api-key');
-        const authHeader = req.header('authorization');
+    const req = context.switchToHttp().getRequest<AuthedRequest>();
+    const apiKey = req.header('x-api-key');
+    const authHeader = req.header('authorization');
 
-        if (apiKey) {
-            const userOnly = this.reflector.getAllAndOverride<boolean>(NO_API_KEY, [
-                context.getHandler(),
-                context.getClass(),
-            ]);
-            if (userOnly) throw new ForbiddenException('This endpoint requires a user session');
-            await this.authenticateApiKey(req, apiKey);
-        } else if (authHeader?.startsWith('Bearer ')) {
-            await this.authenticateJwt(req, authHeader.slice(7));
-        } else {
+    if (apiKey) {
+      const userOnly = this.reflector.getAllAndOverride<boolean>(NO_API_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]);
+      if (userOnly) throw new ForbiddenException('This endpoint requires a user session');
+      await this.authenticateApiKey(req, apiKey);
+    } else if (authHeader?.startsWith('Bearer ')) {
+      await this.authenticateJwt(req, authHeader.slice(7));
+    } else {
       throw new UnauthorizedException('Authentication required');
     }
 
