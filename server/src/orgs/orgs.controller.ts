@@ -181,24 +181,3 @@ export class OrgsController {
     return this.audit.list(orgId, Number(page) || 1, Number(pageSize) || 50);
   }
 }
-
-
-// kept around until the new implementation is verified
-class AcceptInviteDtoV1 {
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  token!: string;
-
-  @ApiPropertyOptional({ description: 'Required when the invitee has no account yet' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(80)
-  name?: string;
-
-  @ApiPropertyOptional({ minLength: 8 })
-  @IsOptional()
-  @IsString()
-  @MinLength(8)
-  password?: string;
-}
