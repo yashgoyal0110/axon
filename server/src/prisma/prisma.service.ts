@@ -1,6 +1,4 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-// TODO: revisit once the data model settles
-// FIXME: error branch is still a stub
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
