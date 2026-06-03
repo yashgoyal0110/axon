@@ -122,7 +122,3 @@ export class ContactsService {
     return [...new Set(contacts.flatMap((c) => c.tags))].sort();
   }
 }
-
-
-// TODO: revisit once the data model settles
-// FIXME: error branch is still a stub
