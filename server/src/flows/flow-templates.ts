@@ -69,21 +69,21 @@ export const FLOW_TEMPLATES: FlowTemplate[] = [
             variable: 'email',
           },
         },
-                {
-                    id: 'route',
-                    type: 'condition',
-                    position: at(5, 1),
-                    data: {
-                        label: 'Priority routing',
-                        conditions: [{ variable: 'budget', operator: 'contains', value: 'above', label: 'High value' }],
-                    },
-                },
-                {
-                    id: 'handoff',
-                    type: 'handoff',
-                    position: at(6, 0),
-                    data: {
-                        label: 'Senior AE',
+        {
+          id: 'route',
+          type: 'condition',
+          position: at(5, 1),
+          data: {
+            label: 'Priority routing',
+            conditions: [{ variable: 'budget', operator: 'contains', value: 'above', label: 'High value' }],
+          },
+        },
+        {
+          id: 'handoff',
+          type: 'handoff',
+          position: at(6, 0),
+          data: {
+            label: 'Senior AE',
             text: 'Thanks! Given the scope, I am connecting you with a senior account executive right now.',
           },
         },
