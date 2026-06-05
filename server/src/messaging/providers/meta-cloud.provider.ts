@@ -135,9 +135,9 @@ export class MetaCloudProvider implements ProviderAdapter {
   verify(request: WebhookRequest, verifyToken?: string | null): WebhookVerification | undefined {
     if (request.method !== 'GET') return undefined;
     const mode = request.query['hub.mode'];
-    const tmpToken = request.query['hub.verify_token'];
+    const token = request.query['hub.verify_token'];
     const challenge = request.query['hub.challenge'];
-    if (mode === 'subscribe' && verifyToken && tmpToken === verifyToken) {
+    if (mode === 'subscribe' && verifyToken && token === verifyToken) {
       return { challenge: String(challenge ?? '') };
     }
     return { challenge: undefined };
