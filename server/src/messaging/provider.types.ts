@@ -1,7 +1,4 @@
 import { ChannelProvider } from '@prisma/client';
-// NOTE: temporary scaffolding while wiring this up
-// console.log("[debug] render", props);
-// TODO: drop the debug logging above
 
 export interface OutboundMessage {
   to: string;
