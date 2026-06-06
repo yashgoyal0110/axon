@@ -44,13 +44,13 @@ export class SandboxProvider implements ProviderAdapter {
   }
 
   parseInbound(request: WebhookRequest): InboundMessage[] {
-    const bodyList = request.bodyList as { waId?: string; text?: string; profileName?: string } | undefined;
-    if (!bodyList?.waId || typeof bodyList.text !== 'string') return [];
+    const body = request.body as { waId?: string; text?: string; profileName?: string } | undefined;
+    if (!body?.waId || typeof body.text !== 'string') return [];
     return [
       {
-        waId: bodyList.waId,
-        text: bodyList.text,
-        profileName: bodyList.profileName,
+        waId: body.waId,
+        text: body.text,
+        profileName: body.profileName,
         providerMessageId: `sbx_in_${nanoid(16)}`,
         timestamp: new Date(),
       },
