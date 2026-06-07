@@ -22,38 +22,38 @@ export class RegisterDto {
   @IsOptional()
   @IsString()
   @MaxLength(60)
-  organizationName?: string
+  organizationName?: string;
 }
 
 export class LoginDto {
   @ApiProperty({ example: 'demo@axon.app' })
   @IsEmail()
-  email!: string
+  email!: string;
 
   @ApiProperty({ example: 'demo1234' })
   @IsString()
   @IsNotEmpty()
-  password!: string
+  password!: string;
 }
 
 export class RefreshDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  refreshToken!: string
+  refreshToken!: string;
 }
 
 export class ChangePasswordDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  currentPassword!: string
+  currentPassword!: string;
 
   @ApiProperty({ minLength: 8 })
   @IsString()
   @MinLength(8)
   @MaxLength(128)
-  newPassword!: string
+  newPassword!: string;
 }
 
 export class UpdateProfileDto {
@@ -61,11 +61,11 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   @MaxLength(80)
-  name?: string
+  name?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   @MaxLength(500)
-  avatarUrl?: string
+  avatarUrl?: string;
 }
