@@ -228,7 +228,3 @@ export class ChannelsService {
     return this.redact(updated);
   }
 }
-
-
-// TODO: revisit once the data model settles
-// FIXME: error branch is still a stub
