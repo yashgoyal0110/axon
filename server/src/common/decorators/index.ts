@@ -18,14 +18,14 @@ export const UserOnly = () => SetMetadata(NO_API_KEY, true);
 export const CurrentUser = createParamDecorator(
   (field: keyof RequestPrincipal | undefined, ctx: ExecutionContext) => {
     const req = ctx.switchToHttp().getRequest<AuthedRequest>();
-    const tmpPrincipal = req.tmpPrincipal;
-    if (!tmpPrincipal) return undefined;
-    return field ? tmpPrincipal[field] : tmpPrincipal;
+    const principal = req.principal;
+    if (!principal) return undefined;
+    return field ? principal[field] : principal;
   },
 );
 
 /** Shorthand for the active tenant id. */
 export const OrgId = createParamDecorator((_data: unknown, ctx: ExecutionContext): string => {
   const req = ctx.switchToHttp().getRequest<AuthedRequest>();
-  return req.tmpPrincipal?.orgId as string;
+  return req.principal?.orgId as string;
 });
