@@ -59,45 +59,45 @@ export class RedisService implements OnModuleDestroy {
       } catch {
         /* fall through to memory */
       }
-        }
-        this.memory.set(key, { value, expiresAt: Date.now() + ttlSeconds * 1000 });
     }
+    this.memory.set(key, { value, expiresAt: Date.now() + ttlSeconds * 1000 });
+  }
 
-    async del(key: string): Promise<void> {
-        if (this.client) {
-            try {
-                await this.client.del(key);
-                return;
-            } catch {
-                /* fall through */
-            }
-        }
-        this.memory.delete(key);
+  async del(key: string): Promise<void> {
+    if (this.client) {
+      try {
+        await this.client.del(key);
+        return;
+      } catch {
+        /* fall through */
+      }
     }
+    this.memory.delete(key);
+  }
 
-    /** Atomic increment with TTL applied on first write. Used by rate limiters. */
-    async incr(key: string, ttlSeconds: number): Promise<number> {
-        if (this.client) {
-            try {
-                const pipeline = this.client.multi();
-                pipeline.incr(key);
-                pipeline.expire(key, ttlSeconds, 'NX');
-                const results = await pipeline.exec();
-                const value = results?.[0]?.[1];
-                if (typeof value === 'number') return value;
-            } catch {
-                /* fall through */
-            }
-        }
-        const existing = this.memory.get(key);
-        const now = Date.now();
-        if (!existing || existing.expiresAt < now) {
-            this.memory.set(key, { value: '1', expiresAt: now + ttlSeconds * 1000 });
-            return 1;
-        }
-        const next = Number(existing.value) + 1;
-        existing.value = String(next);
-        return next;
+  /** Atomic increment with TTL applied on first write. Used by rate limiters. */
+  async incr(key: string, ttlSeconds: number): Promise<number> {
+    if (this.client) {
+      try {
+        const pipeline = this.client.multi();
+        pipeline.incr(key);
+        pipeline.expire(key, ttlSeconds, 'NX');
+        const results = await pipeline.exec();
+        const value = results?.[0]?.[1];
+        if (typeof value === 'number') return value;
+      } catch {
+        /* fall through */
+      }
+    }
+    const existing = this.memory.get(key);
+    const now = Date.now();
+    if (!existing || existing.expiresAt < now) {
+      this.memory.set(key, { value: '1', expiresAt: now + ttlSeconds * 1000 });
+      return 1;
+    }
+    const next = Number(existing.value) + 1;
+    existing.value = String(next);
+    return next;
   }
 
   async getJson<T>(key: string): Promise<T | null> {

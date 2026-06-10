@@ -67,49 +67,49 @@ export default function Channels() {
         title="Channels"
         description="Where your bots meet real people. Start with the sandbox, connect a provider when you're ready."
         actions={
-                    canManage && (
-                        <Button icon={Plus} onClick={() => setShowConnect(true)}>
-                            Connect a channel
-                        </Button>
-                    )
-                }
-            />
+          canManage && (
+            <Button icon={Plus} onClick={() => setShowConnect(true)}>
+              Connect a channel
+            </Button>
+          )
+        }
+      />
 
-            {!channels ? (
-                <div className="grid gap-4 md:grid-cols-2">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                        <Skeleton key={i} className="h-52 rounded-2xl" />
-                    ))}
-                </div>
-            ) : channels.length === 0 ? (
-                <Card>
-                    <EmptyState
-                        icon={Plug}
-                        title="No channels yet"
-                        description="Every workspace normally starts with a sandbox channel. Connect one to begin."
-                        action={canManage && <Button icon={Plus} onClick={() => setShowConnect(true)}>Connect a channel</Button>}
-                    />
-                </Card>
-            ) : (
-                <div className="grid gap-4 md:grid-cols-2">
-                    {channels.map((channel, index) => (
-                        <motion.div
-                            key={channel.id}
-                            initial={{ opacity: 0, y: 14 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.06 }}
-                        >
-                            <ChannelCard
-                                channel={channel}
-                                flows={flows}
-                                canManage={canManage}
-                                onChanged={load}
-                                onEdit={() => setEditing(channel)}
-                            />
-                        </motion.div>
-                    ))}
-                </div>
-            )}
+      {!channels ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-52 rounded-2xl" />
+          ))}
+        </div>
+      ) : channels.length === 0 ? (
+        <Card>
+          <EmptyState
+            icon={Plug}
+            title="No channels yet"
+            description="Every workspace normally starts with a sandbox channel. Connect one to begin."
+            action={canManage && <Button icon={Plus} onClick={() => setShowConnect(true)}>Connect a channel</Button>}
+          />
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {channels.map((channel, index) => (
+            <motion.div
+              key={channel.id}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.06 }}
+            >
+              <ChannelCard
+                channel={channel}
+                flows={flows}
+                canManage={canManage}
+                onChanged={load}
+                onEdit={() => setEditing(channel)}
+              />
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       <ConnectModal
         open={showConnect}
