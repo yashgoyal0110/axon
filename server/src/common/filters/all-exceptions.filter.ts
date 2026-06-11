@@ -37,9 +37,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       if (typeof response === 'string') {
         message = response;
       } else if (typeof response === 'object' && response !== null) {
-        const bodyValue = response as Record<string, unknown>;
-        message = (bodyValue.message as string | string[]) ?? exception.message;
-        error = (bodyValue.error as string) ?? exception.name;
+        const body = response as Record<string, unknown>;
+        message = (body.message as string | string[]) ?? exception.message;
+        error = (body.error as string) ?? exception.name;
       }
       error = error === 'InternalServerError' ? exception.name : error;
     } else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
@@ -77,7 +77,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       this.logger.warn(`${req.method} ${req.originalUrl} -> ${status}: ${Array.isArray(message) ? message[0] : message}`);
     }
 
-    const bodyValue: ErrorBody = {
+    const body: ErrorBody = {
       statusCode: status,
       error,
       message,
@@ -85,6 +85,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
     };
 
-    res.status(status).json(bodyValue);
+    res.status(status).json(body);
   }
 }

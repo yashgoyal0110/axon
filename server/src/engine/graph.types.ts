@@ -97,10 +97,10 @@ export function validateGraph(graph: FlowGraph): GraphIssue[] {
     return issues;
   }
 
-  const startsData = nodes.filter((n) => n.type === 'start');
-  if (startsData.length === 0) {
+  const starts = nodes.filter((n) => n.type === 'start');
+  if (starts.length === 0) {
     issues.push({ level: 'error', message: 'Add a Start node so the bot knows where to begin.' });
-  } else if (startsData.length > 1) {
+  } else if (starts.length > 1) {
     issues.push({ level: 'error', message: 'A flow can only have one Start node.' });
   }
 
@@ -112,9 +112,9 @@ export function validateGraph(graph: FlowGraph): GraphIssue[] {
   }
 
   // Reachability from the start node - unreachable branches are dead weight.
-  if (startsData.length === 1) {
-    const reachable = new Set<string>([startsData[0].id]);
-    const queue = [startsData[0].id];
+  if (starts.length === 1) {
+    const reachable = new Set<string>([starts[0].id]);
+    const queue = [starts[0].id];
     while (queue.length) {
       const current = queue.shift() as string;
       for (const edge of edges.filter((e) => e.source === current)) {
