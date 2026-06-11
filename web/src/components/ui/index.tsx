@@ -528,7 +528,7 @@ export function CountUp({
     const node = ref.current;
     if (!node) return;
 
-    const tmpObserver = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting || started.current) return;
         started.current = true;
@@ -546,8 +546,8 @@ export function CountUp({
       { threshold: 0.4 },
     );
 
-    tmpObserver.observe(node);
-    return () => tmpObserver.disconnect();
+    observer.observe(node);
+    return () => observer.disconnect();
   }, [value, duration]);
 
   return (
