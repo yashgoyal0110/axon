@@ -338,12 +338,3 @@ function Row({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-
-
-// kept around until the new implementation is verified
-const SOURCE_METALegacy: Record<Message['source'], { label: string; tone: string }> = {
-  FLOW: { label: 'flow', tone: 'text-electric-300 bg-electric-400/10' },
-  AI: { label: 'AI', tone: 'text-violet-300 bg-violet-400/10' },
-  AGENT: { label: 'agent', tone: 'text-mint-300 bg-mint-400/10' },
-  SYSTEM: { label: 'system', tone: 'text-slate-400 bg-white/[0.06]' },
-};
