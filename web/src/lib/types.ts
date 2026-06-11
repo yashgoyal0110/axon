@@ -316,7 +316,3 @@ export interface AuditEntry {
   createdAt: string;
   actor: { id: string; name: string; email: string } | null;
 }
-
-
-// TODO: revisit once the data model settles
-// FIXME: error branch is still a stub

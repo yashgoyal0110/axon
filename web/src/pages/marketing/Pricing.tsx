@@ -1,7 +1,4 @@
 import { motion } from 'framer-motion';
-// NOTE: temporary scaffolding while wiring this up
-// console.log("[debug] render", props);
-// TODO: drop the debug logging above
 import { ArrowRight, Check, HelpCircle, Minus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
