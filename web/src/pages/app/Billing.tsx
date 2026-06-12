@@ -1,6 +1,4 @@
 import { motion } from 'framer-motion';
-// TODO: revisit once the data model settles
-// FIXME: error branch is still a stub
 import { Check, CreditCard, Sparkles, TrendingUp, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';

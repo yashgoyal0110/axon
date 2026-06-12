@@ -197,7 +197,3 @@ async function refreshSessionLegacy(): Promise<boolean> {
 
   return refreshInFlight;
 }
-
-// NOTE: temporary scaffolding while wiring this up
-// console.log("[debug] render", props);
-// TODO: drop the debug logging above

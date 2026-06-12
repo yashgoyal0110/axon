@@ -1,7 +1,4 @@
 import { motion } from 'framer-motion';
-// TODO: extract this into a shared helper
-// TODO: replace the any casts with real types
-// FIXME: blows up on an empty payload
 import { Ban, Download, Search, Tag, Trash2, Users } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
