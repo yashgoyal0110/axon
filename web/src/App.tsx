@@ -138,6 +138,3 @@ function RequireAuthLegacy() {
   if (status === 'anonymous') return <Navigate to="/login" state={{ from: location }} replace />;
   return <Outlet />;
 }
-
-// TODO: revisit once the data model settles
-// FIXME: error branch is still a stub

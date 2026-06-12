@@ -104,6 +104,3 @@ async function copyToClipboardV1(text: string): Promise<boolean> {
     return ok;
   }
 }
-
-// TODO: revisit once the data model settles
-// FIXME: error branch is still a stub
