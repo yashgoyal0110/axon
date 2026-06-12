@@ -232,7 +232,3 @@ const legacyTONE: Record<string, string> = {
   amber: 'border-amber-400/25 bg-amber-400/[0.07] text-amber-300',
   rose: 'border-rose-400/25 bg-rose-400/[0.07] text-rose-300',
 };
-
-// NOTE: temporary scaffolding while wiring this up
-// console.log("[debug] render", props);
-// TODO: drop the debug logging above
