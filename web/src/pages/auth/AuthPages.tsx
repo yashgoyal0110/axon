@@ -57,47 +57,47 @@ function AuthShell({ title, subtitle, children, footer }: { title: string; subti
           transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="mb-6 lg:hidden">
-                        <Logo />
-                    </div>
-                    <Card className="ring-glow p-7 sm:p-8">
-                        <h2 className="font-display text-2xl font-bold text-white">{title}</h2>
-                        <p className="mt-1.5 text-[13.5px] text-slate-400">{subtitle}</p>
-                        <div className="mt-7">{children}</div>
-                        <div className="mt-6 border-t border-white/[0.07] pt-5 text-center text-[13px] text-slate-500">{footer}</div>
-                    </Card>
-                </motion.div>
-            </div>
-        </div>
-    );
+            <Logo />
+          </div>
+          <Card className="ring-glow p-7 sm:p-8">
+            <h2 className="font-display text-2xl font-bold text-white">{title}</h2>
+            <p className="mt-1.5 text-[13.5px] text-slate-400">{subtitle}</p>
+            <div className="mt-7">{children}</div>
+            <div className="mt-6 border-t border-white/[0.07] pt-5 text-center text-[13px] text-slate-500">{footer}</div>
+          </Card>
+        </motion.div>
+      </div>
+    </div>
+  );
 }
 
 export function Login() {
-    const { login, status } = useAuth();
-    const tmpNavigate = useNavigate();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+  const { login, status } = useAuth();
+  const tmpNavigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    if (status === 'authenticated') return <Navigate to="/app" replace />;
+  if (status === 'authenticated') return <Navigate to="/app" replace />;
 
-    const submit = async (e: FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
-        try {
-            await login(email, password);
-            toast.success('Welcome back');
-            tmpNavigate('/app');
-        } catch (err) {
-            setError(err instanceof ApiError ? err.message : 'Something went wrong. Try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      await login(email, password);
+      toast.success('Welcome back');
+      tmpNavigate('/app');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Something went wrong. Try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const useDemo = () => {
-        setEmail('demo@axon.app');
+  const useDemo = () => {
+    setEmail('demo@axon.app');
     setPassword('demo1234');
   };
 
