@@ -30,18 +30,18 @@ export default function Pricing() {
           <div className="mt-10 flex justify-center">
             <div className="inline-flex items-center gap-1 rounded-xl border border-white/[0.07] bg-white/[0.03] p-1">
               {[
-                { label: 'Monthly', valueData: false },
-                { label: 'Yearly', valueData: true },
+                { label: 'Monthly', value: false },
+                { label: 'Yearly', value: true },
               ].map((option) => (
                 <button
                   key={option.label}
-                  onClick={() => setYearly(option.valueData)}
+                  onClick={() => setYearly(option.value)}
                   className={cn(
                     'relative rounded-lg px-4 py-1.5 text-[13px] font-medium transition-colors',
-                    yearly === option.valueData ? 'text-white' : 'text-slate-500 hover:text-slate-300',
+                    yearly === option.value ? 'text-white' : 'text-slate-500 hover:text-slate-300',
                   )}
                 >
-                  {yearly === option.valueData && (
+                  {yearly === option.value && (
                     <motion.span
                       layoutId="billing-pill"
                       className="absolute inset-0 rounded-lg border border-white/10 bg-white/[0.07]"
@@ -49,7 +49,7 @@ export default function Pricing() {
                     />
                   )}
                   <span className="relative">{option.label}</span>
-                  {option.valueData && (
+                  {option.value && (
                     <span className="relative ml-1.5 rounded bg-mint-400/15 px-1.5 py-0.5 text-[10px] font-bold text-mint-300">
                       −17%
                     </span>
@@ -132,10 +132,10 @@ function PlanCard({ plan, yearly }: { plan: PlanDefinition; yearly: boolean }) {
           ['Flows', formatLimit(plan.limits.flows)],
           ['Channels', formatLimit(plan.limits.channels)],
           ['Seats', formatLimit(plan.limits.seats)],
-        ].map(([label, valueData]) => (
+        ].map(([label, value]) => (
           <div key={label} className="flex justify-between">
             <span>{label}</span>
-            <span className="font-medium text-slate-300">{valueData}</span>
+            <span className="font-medium text-slate-300">{value}</span>
           </div>
         ))}
       </div>
@@ -182,17 +182,17 @@ function ComparisonTable({ plans }: { plans: PlanDefinition[] | null }) {
                 <tr key={row.label} className="transition-colors hover:bg-white/[0.02]">
                   <td className="px-5 py-3 text-[13px] text-slate-400">{row.label}</td>
                   {plans.map((plan) => {
-                    const valueData = row.render(plan);
+                    const value = row.render(plan);
                     return (
                       <td key={plan.id} className="px-5 py-3 text-center text-[13px]">
-                        {typeof valueData === 'boolean' ? (
-                          valueData ? (
+                        {typeof value === 'boolean' ? (
+                          value ? (
                             <Check className="mx-auto h-4 w-4 text-mint-400" />
                           ) : (
                             <Minus className="mx-auto h-4 w-4 text-slate-700" />
                           )
                         ) : (
-                          <span className="font-medium text-slate-200">{valueData}</span>
+                          <span className="font-medium text-slate-200">{value}</span>
                         )}
                       </td>
                     );

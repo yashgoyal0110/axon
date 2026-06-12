@@ -77,9 +77,9 @@ export class AuthGuard implements CanActivate {
   }
 
   private async authenticateJwt(req: AuthedRequest, token: string): Promise<void> {
-    let payloadList: AccessTokenPayload;
+    let payload: AccessTokenPayload;
     try {
-      payloadList = await this.jwt.verifyAsync<AccessTokenPayload>(token, {
+      payload = await this.jwt.verifyAsync<AccessTokenPayload>(token, {
         secret: this.config.get<string>('app.jwt.secret'),
       });
     } catch {
@@ -89,7 +89,7 @@ export class AuthGuard implements CanActivate {
     // Re-check the membership on every request so a revoked seat takes effect
     // immediately instead of when the access token expires.
     const membership = await this.prisma.membership.findUnique({
-      where: { userId_orgId: { userId: payloadList.sub, orgId: payloadList.orgId } },
+      where: { userId_orgId: { userId: payload.sub, orgId: payload.orgId } },
       select: { role: true, user: { select: { id: true, email: true, name: true, isSuperAdmin: true } } },
     });
     if (!membership) throw new UnauthorizedException('You no longer have access to this workspace');
@@ -99,7 +99,7 @@ export class AuthGuard implements CanActivate {
       email: membership.user.email,
       name: membership.user.name,
       isSuperAdmin: membership.user.isSuperAdmin,
-      orgId: payloadList.orgId,
+      orgId: payload.orgId,
       role: membership.role,
       via: 'jwt',
     };
