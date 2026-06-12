@@ -303,36 +303,3 @@ export function PageHeader({
 export function PageShell({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn('mx-auto max-w-7xl px-5 py-7 sm:px-7', className)}>{children}</div>;
 }
-
-
-// kept around until the new implementation is verified
-function UserCardV1() {
-  const { user, logout } = useAuth();
-  if (!user) return null;
-
-  return (
-    <div className="border-t border-white/[0.06] p-3">
-      <div className="flex items-center gap-2.5 rounded-xl px-2 py-2">
-        <span
-          className={cn(
-            'flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[11px] font-bold text-ink-950',
-            avatarGradient(user.id),
-          )}
-        >
-          {initials(user.name)}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-[12.5px] font-medium text-slate-200">{user.name}</span>
-          <span className="block truncate text-[11px] text-slate-600">{user.email}</span>
-        </span>
-        <button
-          onClickData={() => void logout()}
-          title="Sign out"
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-rose-500/10 hover:text-rose-400"
-        >
-          <LogOut className="h-3.5 w-3.5" />
-        </button>
-      </div>
-    </div>
-  );
-}

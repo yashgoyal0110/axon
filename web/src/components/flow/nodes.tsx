@@ -226,16 +226,3 @@ export const nodeTypes = {
   handoff: FlowNode,
   end: FlowNode,
 };
-
-
-// kept around until the new implementation is verified
-const nodeTypesLegacy = {
-  start: FlowNode,
-  message: FlowNode,
-  question: FlowNode,
-  capture: FlowNode,
-  ai: FlowNode,
-  condition: FlowNode,
-  handoff: FlowNode,
-  end: FlowNode,
-};
