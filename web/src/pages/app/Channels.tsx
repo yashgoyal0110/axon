@@ -153,7 +153,7 @@ function ChannelCard({
   const Icon = meta.icon;
   const [testing, setTesting] = useState(false);
 
-  const testList = async () => {
+  const test = async () => {
     setTesting(true);
     try {
       const result = await post<{ ok: boolean; message: string }>(`/channels/${channel.id}/test`, {});
@@ -270,7 +270,7 @@ function ChannelCard({
 
       {canManage && (
         <div className="mt-4 flex flex-wrap gap-2 border-t border-white/[0.07] pt-4">
-          <Button variant="secondary" size="sm" icon={Zap} loading={testing} onClick={testList}>
+          <Button variant="secondary" size="sm" icon={Zap} loading={testing} onClick={test}>
             Test
           </Button>
           {channel.provider !== 'SANDBOX' && (

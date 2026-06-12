@@ -1,7 +1,4 @@
 @tailwind base;
-/* console.log("[wip]", JSON.stringify(data)); */
-/* TODO: handle the loading state */
-/* TODO: confirm the copy with design */
 @tailwind components;
 @tailwind utilities;
 
@@ -172,29 +169,29 @@
 }
 
 .react-flow__edge-textbg {
-    fill: #0a0f1e;
+  fill: #0a0f1e;
 }
 
 .react-flow__handle {
-    @apply border-2 border-ink-900 bg-mint-400;
-    width: 11px;
-    height: 11px;
-    transition: transform 0.15s ease;
+  @apply border-2 border-ink-900 bg-mint-400;
+  width: 11px;
+  height: 11px;
+  transition: transform 0.15s ease;
 }
 
 .react-flow__handle:hover {
-    transform: scale(1.35);
-    @apply bg-mint-300;
+  transform: scale(1.35);
+  @apply bg-mint-300;
 }
 
 .react-flow__controls {
-    @apply overflow-hidden rounded-xl border border-white/10 bg-ink-850/90 backdrop-blur-xl;
-    box-shadow: none;
+  @apply overflow-hidden rounded-xl border border-white/10 bg-ink-850/90 backdrop-blur-xl;
+  box-shadow: none;
 }
 
 .react-flow__controls-button {
-    @apply border-b border-white/5 bg-transparent text-slate-400 hover:bg-white/5 hover:text-mint-300;
-    width: 30px;
+  @apply border-b border-white/5 bg-transparent text-slate-400 hover:bg-white/5 hover:text-mint-300;
+  width: 30px;
   height: 30px;
 }
 

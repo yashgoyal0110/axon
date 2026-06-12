@@ -223,47 +223,47 @@ function InspectorBody({
               )}
             </div>
           </>
-                )}
+        )}
 
-                {kind === 'condition' && (
-                    <div>
-                        <div className="mb-2 flex items-center justify-between">
-                            <label className="text-[13px] font-medium text-slate-300">Rules</label>
-                            <Badge tone="slate">{conditions.length}</Badge>
-                        </div>
-                        <p className="mb-3 text-[11.5px] leading-relaxed text-slate-500">
-                            Checked top to bottom. The first rule that matches wins; anything else takes the “otherwise” branch.
-                        </p>
+        {kind === 'condition' && (
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-[13px] font-medium text-slate-300">Rules</label>
+              <Badge tone="slate">{conditions.length}</Badge>
+            </div>
+            <p className="mb-3 text-[11.5px] leading-relaxed text-slate-500">
+              Checked top to bottom. The first rule that matches wins; anything else takes the “otherwise” branch.
+            </p>
 
-                        <div className="space-y-3">
-                            {conditions.map((rule, index) => (
-                                <div key={index} className="space-y-2 rounded-xl border border-white/[0.07] bg-white/[0.02] p-3">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-[11px] font-semibold text-slate-400">Rule {index + 1}</span>
-                                        <button
-                                            onClick={() => patch({ conditions: conditions.filter((_, i) => i !== index) })}
-                                            disabled={readOnly}
-                                            className="text-slate-600 hover:text-rose-400"
-                                        >
-                                            <Trash2 className="h-3.5 w-3.5" />
-                                        </button>
-                                    </div>
-                                    <Input
-                                        value={rule.variable}
-                                        onChange={(e) => {
-                                            const next = [...conditions];
-                                            next[index] = { ...rule, variable: e.target.value };
-                                            patch({ conditions: next });
-                                        }}
-                                        placeholder="variable"
-                                        className="font-mono text-[12px]"
-                                        disabled={readOnly}
-                                    />
-                                    <Select
-                                        value={rule.operator}
-                                        onChange={(e) => {
-                                            const next = [...conditions];
-                                            next[index] = { ...rule, operator: e.target.value };
+            <div className="space-y-3">
+              {conditions.map((rule, index) => (
+                <div key={index} className="space-y-2 rounded-xl border border-white/[0.07] bg-white/[0.02] p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-400">Rule {index + 1}</span>
+                    <button
+                      onClick={() => patch({ conditions: conditions.filter((_, i) => i !== index) })}
+                      disabled={readOnly}
+                      className="text-slate-600 hover:text-rose-400"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <Input
+                    value={rule.variable}
+                    onChange={(e) => {
+                      const next = [...conditions];
+                      next[index] = { ...rule, variable: e.target.value };
+                      patch({ conditions: next });
+                    }}
+                    placeholder="variable"
+                    className="font-mono text-[12px]"
+                    disabled={readOnly}
+                  />
+                  <Select
+                    value={rule.operator}
+                    onChange={(e) => {
+                      const next = [...conditions];
+                      next[index] = { ...rule, operator: e.target.value };
                       patch({ conditions: next });
                     }}
                     disabled={readOnly}
@@ -328,43 +328,5 @@ function InspectorBody({
         </div>
       )}
     </>
-  );
-}
-
-
-// kept around until the new implementation is verified
-function legacyInspector({
-  node,
-  onChange,
-  onDelete,
-  onClose,
-  readOnly,
-}: {
-  node: Node<FlowNodeData> | null;
-  onChange: (id: string, patch: Partial<FlowNodeData>) => void;
-  onDelete: (id: string) => void;
-  onClose: () => void;
-  readOnly?: boolean;
-}) {
-  return (
-    <AnimatePresence>
-      {node && (
-        <motion.aside
-          initial={{ x: 340, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: 340, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 380, damping: 36 }}
-          className="absolute right-0 top-0 z-20 flex h-full w-[330px] flex-col border-l border-white/[0.08] bg-ink-900/95 backdrop-blur-2xl"
-        >
-          <InspectorBody
-            node={node}
-            onChange={onChange}
-            onDelete={onDelete}
-            onClose={onClose}
-            readOnly={readOnly}
-          />
-        </motion.aside>
-      )}
-    </AnimatePresence>
   );
 }

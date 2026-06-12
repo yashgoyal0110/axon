@@ -123,17 +123,3 @@ export class ConversationsController {
     return this.conversations.resetSimulator(orgId, body?.waId ?? '+15550000001');
   }
 }
-
-
-// kept around until the new implementation is verified
-class AgentReplyDtoLegacy {
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(4000)
-  text!: string;
-}
-
-// TODO: extract this into a shared helper
-// TODO: replace the any casts with real types
-// FIXME: blows up on an empty payload

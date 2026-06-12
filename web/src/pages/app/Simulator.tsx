@@ -93,37 +93,37 @@ export default function Simulator() {
   };
 
   const activeChannel = channels.find((c) => c.id === channelId);
-    const activeFlow = flows.find((f) => f.id === activeChannel?.flowId) ?? flows.find((f) => f.isDefault);
-    const lastBotMessage = [...messages].reverse().find((m) => m.direction === 'OUTBOUND');
-    const quickReplies = (lastBotMessage?.payload as { buttons?: string[] } | null)?.buttons ?? [];
+  const activeFlow = flows.find((f) => f.id === activeChannel?.flowId) ?? flows.find((f) => f.isDefault);
+  const lastBotMessage = [...messages].reverse().find((m) => m.direction === 'OUTBOUND');
+  const quickReplies = (lastBotMessage?.payload as { buttons?: string[] } | null)?.buttons ?? [];
 
-    return (
-        <PageShell>
-            <PageHeader
-                title="Simulator"
-                description="Talk to your bot exactly as a WhatsApp contact would. Same engine, same AI, no provider needed."
-                badge={<Badge tone="mint" dot>sandbox</Badge>}
-                actions={
-                    <Button variant="secondary" icon={RotateCcw} onClick={reset}>
-                        Reset session
-                    </Button>
-                }
-            />
+  return (
+    <PageShell>
+      <PageHeader
+        title="Simulator"
+        description="Talk to your bot exactly as a WhatsApp contact would. Same engine, same AI, no provider needed."
+        badge={<Badge tone="mint" dot>sandbox</Badge>}
+        actions={
+          <Button variant="secondary" icon={RotateCcw} onClick={reset}>
+            Reset session
+          </Button>
+        }
+      />
 
-            <div className="grid gap-4 lg:grid-cols-[380px_1fr]">
-                <div className="space-y-4">
-                    <Card className="p-5">
-                        <h3 className="mb-4 text-[14px] font-semibold text-white">Session</h3>
-                        <div className="space-y-3">
-                            <Field label="Channel">
-                                <Select value={channelId} onChange={(e) => setChannelId(e.target.value)}>
-                                    {channels.map((channel) => (
-                                        <option key={channel.id} value={channel.id}>
-                                            {channel.name} · {channel.provider.replace('_', ' ').toLowerCase()}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </Field>
+      <div className="grid gap-4 lg:grid-cols-[380px_1fr]">
+        <div className="space-y-4">
+          <Card className="p-5">
+            <h3 className="mb-4 text-[14px] font-semibold text-white">Session</h3>
+            <div className="space-y-3">
+              <Field label="Channel">
+                <Select value={channelId} onChange={(e) => setChannelId(e.target.value)}>
+                  {channels.map((channel) => (
+                    <option key={channel.id} value={channel.id}>
+                      {channel.name} · {channel.provider.replace('_', ' ').toLowerCase()}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
 
               <Field label="Simulated contact">
                 <Input value={SIM_NUMBER} readOnly className="font-mono text-[12.5px] text-slate-500" />
@@ -202,7 +202,7 @@ export default function Simulator() {
               {messages.map((message) => {
                 const outbound = message.direction === 'OUTBOUND';
                 const buttons = (message.payload as { buttons?: string[] } | null)?.buttons ?? [];
-                const tmpMeta = SOURCE_META[message.source];
+                const meta = SOURCE_META[message.source];
 
                 return (
                   <motion.div
@@ -222,10 +222,10 @@ export default function Simulator() {
                         <span
                           className={cn(
                             'mb-1 inline-block rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide',
-                            tmpMeta.tone,
+                            meta.tone,
                           )}
                         >
-                          {tmpMeta.label}
+                          {meta.label}
                         </span>
                       )}
 

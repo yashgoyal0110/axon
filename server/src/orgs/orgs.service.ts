@@ -147,8 +147,8 @@ export class OrgsService {
 
     // A workspace must always retain at least one owner.
     if (membership.role === Role.OWNER && role !== Role.OWNER) {
-      const ownersData = await this.prisma.membership.count({ where: { orgId, role: Role.OWNER } });
-      if (ownersData <= 1) throw new ForbiddenException('A workspace needs at least one owner');
+      const owners = await this.prisma.membership.count({ where: { orgId, role: Role.OWNER } });
+      if (owners <= 1) throw new ForbiddenException('A workspace needs at least one owner');
     }
 
     const updated = await this.prisma.membership.update({
@@ -166,8 +166,8 @@ export class OrgsService {
     if (!membership) throw new NotFoundException('That person is not a member of this workspace');
 
     if (membership.role === Role.OWNER) {
-      const ownersData = await this.prisma.membership.count({ where: { orgId, role: Role.OWNER } });
-      if (ownersData <= 1) throw new ForbiddenException('A workspace needs at least one owner');
+      const owners = await this.prisma.membership.count({ where: { orgId, role: Role.OWNER } });
+      if (owners <= 1) throw new ForbiddenException('A workspace needs at least one owner');
     }
 
     await this.prisma.membership.delete({ where: { userId_orgId: { userId: memberUserId, orgId } } });

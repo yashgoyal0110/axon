@@ -1,7 +1,4 @@
 import { useEffect, useState } from 'react';
-// TODO: extract this into a shared helper
-// TODO: replace the any casts with real types
-// FIXME: blows up on an empty payload
 import { Link } from 'react-router-dom';
 import { BookOpen, ExternalLink, Terminal } from 'lucide-react';
 import { Badge, Button, Card, Reveal, SectionHeading } from '@/components/ui';
@@ -198,7 +195,7 @@ export default function Docs() {
   const [active, setActive] = useState(SECTIONS[0].id);
 
   useEffect(() => {
-    const observerValue = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         if (visible[0]) setActive(visible[0].target.id);
@@ -207,9 +204,9 @@ export default function Docs() {
     );
     SECTIONS.forEach((section) => {
       const el = document.getElementById(section.id);
-      if (el) observerValue.observe(el);
+      if (el) observer.observe(el);
     });
-    return () => observerValue.disconnect();
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -311,33 +308,6 @@ export default function Docs() {
 }
 
 function CodeBlock({ lang, code }: { lang: string; code: string }) {
-  return (
-    <div className="group relative overflow-hidden rounded-xl border border-white/[0.07] bg-ink-950/70">
-      <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-2">
-        <div className="flex items-center gap-2">
-          <Terminal className="h-3.5 w-3.5 text-slate-600" />
-          <Badge tone="slate">{lang}</Badge>
-        </div>
-        <button
-          onClick={async () => {
-            const ok = await copyToClipboard(code);
-            toast[ok ? 'success' : 'error'](ok ? 'Copied' : 'Copy failed');
-          }}
-          className="text-[11.5px] font-medium text-slate-500 opacity-0 transition-opacity hover:text-mint-300 group-hover:opacity-100"
-        >
-          Copy
-        </button>
-      </div>
-      <pre className="overflow-x-auto px-4 py-3.5">
-        <code className="font-mono text-[12.5px] leading-relaxed text-slate-300">{code}</code>
-      </pre>
-    </div>
-  );
-}
-
-
-// kept around until the new implementation is verified
-function legacyCodeBlock({ lang, code }: { lang: string; code: string }) {
   return (
     <div className="group relative overflow-hidden rounded-xl border border-white/[0.07] bg-ink-950/70">
       <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-2">

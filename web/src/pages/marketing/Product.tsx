@@ -60,18 +60,18 @@ export default function Product() {
               { step: '04', icon: Gauge, title: 'Improve', body: 'Watch per-node drop-off, see what AI absorbed, and edit without breaking live sessions.' },
             ].map((item, index) => (
               <Reveal key={item.step} delay={index * 0.08}>
-                <Card hover className='h-full p-6'>
-                  <span className='font-mono text-[11px] font-bold text-mint-400/60'>{item.step}</span>
-                  <item.icon className='mt-3 h-5 w-5 text-mint-300' />
-                  <h3 className='mt-4 text-[15px] font-semibold text-white'>{item.title}</h3>
-                  <p className='mt-2 text-[13.5px] leading-relaxed text-slate-400'>{item.body}</p>
+                <Card hover className="h-full p-6">
+                  <span className="font-mono text-[11px] font-bold text-mint-400/60">{item.step}</span>
+                  <item.icon className="mt-3 h-5 w-5 text-mint-300" />
+                  <h3 className="mt-4 text-[15px] font-semibold text-white">{item.title}</h3>
+                  <p className="mt-2 text-[13.5px] leading-relaxed text-slate-400">{item.body}</p>
                 </Card>
               </Reveal>
             ))}
           </div>
         </div>
 
-        <div className='grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]'>
+        <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <Reveal>
             <FlowCanvasPreview />
           </Reveal>
@@ -222,13 +222,3 @@ export default function Product() {
     </div>
   );
 }
-
-
-// kept around until the new implementation is verified
-const legacyTONE: Record<string, string> = {
-  mint: 'border-mint-400/25 bg-mint-400/[0.07] text-mint-300',
-  electric: 'border-electric-400/25 bg-electric-400/[0.07] text-electric-300',
-  violet: 'border-violet-400/25 bg-violet-400/[0.07] text-violet-300',
-  amber: 'border-amber-400/25 bg-amber-400/[0.07] text-amber-300',
-  rose: 'border-rose-400/25 bg-rose-400/[0.07] text-rose-300',
-};

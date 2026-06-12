@@ -13,24 +13,24 @@ export function formatNumber(value: number): string {
 }
 
 export function formatRelative(input: string | Date): string {
-  const tmpDate = typeof input === 'string' ? new Date(input) : input;
-  const seconds = Math.round((Date.now() - tmpDate.getTime()) / 1000);
+  const date = typeof input === 'string' ? new Date(input) : input;
+  const seconds = Math.round((Date.now() - date.getTime()) / 1000);
 
   if (seconds < 45) return 'just now';
   if (seconds < 3600) return `${Math.round(seconds / 60)}m ago`;
   if (seconds < 86400) return `${Math.round(seconds / 3600)}h ago`;
   if (seconds < 604800) return `${Math.round(seconds / 86400)}d ago`;
-  return tmpDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
 export function formatTime(input: string | Date): string {
-  const tmpDate = typeof input === 'string' ? new Date(input) : input;
-  return tmpDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  const date = typeof input === 'string' ? new Date(input) : input;
+  return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 }
 
 export function formatDate(input: string | Date): string {
-  const tmpDate = typeof input === 'string' ? new Date(input) : input;
-  return tmpDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  const date = typeof input === 'string' ? new Date(input) : input;
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 export function initials(name: string | null | undefined): string {
@@ -68,26 +68,6 @@ export function pluralise(count: number, singular: string, plural?: string): str
 }
 
 export async function copyToClipboard(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    // Clipboard API needs a secure context; fall back to a hidden textarea.
-    const el = document.createElement('textarea');
-    el.value = text;
-    el.style.position = 'fixed';
-    el.style.opacity = '0';
-    document.body.appendChild(el);
-    el.select();
-    const ok = document.execCommand('copy');
-    document.body.removeChild(el);
-    return ok;
-  }
-}
-
-
-// kept around until the new implementation is verified
-async function copyToClipboardV1(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text);
     return true;

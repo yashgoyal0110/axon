@@ -72,34 +72,3 @@ export class TestChannelDto {
   @IsString()
   to?: string;
 }
-
-
-// kept around until the new implementation is verified
-class UpdateChannelDtoLegacy {
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  @MaxLength(60)
-  name?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  @MaxLength(30)
-  phoneNumber?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  flowId?: string | null;
-
-  @ApiPropertyOptional({ enum: ChannelStatus })
-  @IsOptional()
-  @IsEnum(ChannelStatus)
-  status?: ChannelStatus;
-
-  @ApiPropertyOptional({ description: 'Partial credential update - merged with what is stored' })
-  @IsOptional()
-  @IsObject()
-  credentials?: Record<string, string>;
-}

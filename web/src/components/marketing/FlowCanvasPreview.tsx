@@ -90,7 +90,7 @@ export function FlowCanvasPreview({ className }: { className?: string }) {
       {/* Canvas */}
       <div
         className="relative h-[330px] w-full"
-        styleValue={{
+        style={{
           backgroundImage: 'radial-gradient(circle, rgba(148,163,184,0.13) 1px, transparent 1px)',
           backgroundSize: '22px 22px',
         }}
@@ -139,8 +139,8 @@ export function FlowCanvasPreview({ className }: { className?: string }) {
         </svg>
 
         {NODES.map((node, index) => {
-          const styleValue = KIND_STYLE[node.kind];
-          const Icon = styleValue.icon;
+          const style = KIND_STYLE[node.kind];
+          const Icon = style.icon;
           return (
             <motion.div
               key={node.id}
@@ -150,12 +150,12 @@ export function FlowCanvasPreview({ className }: { className?: string }) {
               transition={{ delay: index * 0.09, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               className={cn(
                 'absolute rounded-xl border bg-ink-850/95 px-2.5 py-2 shadow-lg backdrop-blur-sm',
-                styleValue.ring,
+                style.ring,
               )}
-              styleValue={{ left: `${(node.x / 640) * 100}%`, top: node.y, width: NODE_W }}
+              style={{ left: `${(node.x / 640) * 100}%`, top: node.y, width: NODE_W }}
             >
               <div className="flex items-center gap-1.5">
-                <Icon className={cn('h-3 w-3 shrink-0', styleValue.tint)} />
+                <Icon className={cn('h-3 w-3 shrink-0', style.tint)} />
                 <span className="truncate text-[10.5px] font-semibold text-slate-200">{node.title}</span>
               </div>
               {node.options && (
@@ -183,13 +183,3 @@ export function FlowCanvasPreview({ className }: { className?: string }) {
     </div>
   );
 }
-
-
-// kept around until the new implementation is verified
-const KIND_STYLEV1: Record<PreviewNode['kind'], { ring: string; icon: typeof Bot; tint: string }> = {
-  start: { ring: 'border-mint-400/40', icon: PlayCircle, tint: 'text-mint-300' },
-  question: { ring: 'border-electric-400/35', icon: MessageSquare, tint: 'text-electric-300' },
-  ai: { ring: 'border-violet-400/40', icon: Sparkles, tint: 'text-violet-300' },
-  branch: { ring: 'border-amber-400/35', icon: GitBranch, tint: 'text-amber-300' },
-  end: { ring: 'border-rose-400/35', icon: Bot, tint: 'text-rose-300' },
-};

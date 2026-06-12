@@ -23,7 +23,7 @@ export default function Templates() {
     [templates],
   );
 
-  const filteredData = useMemo(() => {
+  const filtered = useMemo(() => {
     if (!templates) return null;
     const needle = query.trim().toLowerCase();
     return templates.filter((template) => {
@@ -45,48 +45,48 @@ export default function Templates() {
           description="Production-shaped flows you can load, edit and publish. Each one wires questions, capture steps, branching and handoff the way it works in practice."
         />
 
-                <Reveal delay={0.08}>
-                    <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-                        <div className="relative flex-1">
-                            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600" />
-                            <Input
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Search templates…"
-                                className="pl-10"
-                            />
-                        </div>
-                        <div className="scrollbar-none flex gap-1.5 overflow-x-auto">
-                            {categories.map((item) => (
-                                <button
-                                    key={item}
-                                    onClick={() => setCategory(item)}
-                                    className={cn(
-                                        'shrink-0 rounded-lg border px-3 py-2 text-[12.5px] font-medium transition-colors',
-                                        category === item
-                                            ? 'border-mint-400/30 bg-mint-400/10 text-mint-300'
-                                            : 'border-white/[0.07] bg-white/[0.02] text-slate-400 hover:text-white',
-                                    )}
-                                >
-                                    {item}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+        <Reveal delay={0.08}>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search templates…"
+                className="pl-10"
+              />
+            </div>
+            <div className="scrollbar-none flex gap-1.5 overflow-x-auto">
+              {categories.map((item) => (
+                <button
+                  key={item}
+                  onClick={() => setCategory(item)}
+                  className={cn(
+                    'shrink-0 rounded-lg border px-3 py-2 text-[12.5px] font-medium transition-colors',
+                    category === item
+                      ? 'border-mint-400/30 bg-mint-400/10 text-mint-300'
+                      : 'border-white/[0.07] bg-white/[0.02] text-slate-400 hover:text-white',
+                  )}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {!filtered
+            ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 rounded-2xl" />)
+            : filtered.map((template, index) => (
+                <Reveal key={template.key} delay={index * 0.06}>
+                  <TemplateCard template={template} />
                 </Reveal>
+              ))}
+        </div>
 
-                <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {!filteredData
-                        ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 rounded-2xl" />)
-                        : filteredData.map((template, index) => (
-                                <Reveal key={template.key} delay={index * 0.06}>
-                                    <TemplateCard template={template} />
-                                </Reveal>
-                            ))}
-                </div>
-
-                {filteredData?.length === 0 && (
-                    <EmptyState
+        {filtered?.length === 0 && (
+          <EmptyState
             icon={Boxes}
             title="No templates match that search"
             description="Try a different term, or start from a blank canvas in the builder."

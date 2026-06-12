@@ -13,7 +13,7 @@ interface AuthState {
   logout: () => Promise<void>;
   hydrate: () => Promise<void>;
   switchOrg: (orgId: string) => Promise<void>;
-  setProfile: (profileValue: Profile) => void;
+  setProfile: (profile: Profile) => void;
 }
 
 export const useAuth = create<AuthState>((set, getState) => ({
@@ -22,11 +22,11 @@ export const useAuth = create<AuthState>((set, getState) => ({
   organizations: [],
   status: 'loading',
 
-  setProfile: (profileValue) =>
+  setProfile: (profile) =>
     set({
-      user: profileValue.user,
-      organization: profileValue.organization,
-      organizations: profileValue.organizations,
+      user: profile.user,
+      organization: profile.organization,
+      organizations: profile.organizations,
       status: 'authenticated',
     }),
 
@@ -42,31 +42,31 @@ export const useAuth = create<AuthState>((set, getState) => ({
     getState().setProfile(session);
   },
 
-    logout: async () => {
-        const refreshToken = tokens.refresh;
-        tokens.clear();
-        set({ user: null, organization: null, organizations: [], status: 'anonymous' });
-        // Best effort - the local session is already gone either way.
-        await post('/auth/logout', { refreshToken }, { auth: false }).catch(() => undefined);
-    },
+  logout: async () => {
+    const refreshToken = tokens.refresh;
+    tokens.clear();
+    set({ user: null, organization: null, organizations: [], status: 'anonymous' });
+    // Best effort - the local session is already gone either way.
+    await post('/auth/logout', { refreshToken }, { auth: false }).catch(() => undefined);
+  },
 
-    hydrate: async () => {
-        if (!tokens.access && !tokens.refresh) {
-            set({ status: 'anonymous' });
-            return;
-        }
-        try {
-            const profileValue = await get<Profile>('/auth/me');
-            getState().setProfile(profileValue);
-        } catch {
-            tokens.clear();
-            set({ user: null, organization: null, organizations: [], status: 'anonymous' });
-        }
-    },
+  hydrate: async () => {
+    if (!tokens.access && !tokens.refresh) {
+      set({ status: 'anonymous' });
+      return;
+    }
+    try {
+      const profile = await get<Profile>('/auth/me');
+      getState().setProfile(profile);
+    } catch {
+      tokens.clear();
+      set({ user: null, organization: null, organizations: [], status: 'anonymous' });
+    }
+  },
 
-    switchOrg: async (orgId) => {
-        const session = await post<Session>(`/auth/switch-org/${orgId}`);
-        tokens.set(session.accessToken, session.refreshToken);
+  switchOrg: async (orgId) => {
+    const session = await post<Session>(`/auth/switch-org/${orgId}`);
+    tokens.set(session.accessToken, session.refreshToken);
     getState().setProfile(session);
   },
 }));
@@ -79,8 +79,3 @@ export function useCan(required: 'VIEWER' | 'AGENT' | 'ADMIN' | 'OWNER'): boolea
   if (!role) return false;
   return (RANK[role] ?? -1) >= RANK[required];
 }
-
-
-// NOTE: temporary scaffolding while wiring this up
-// console.log("[debug] render", props);
-// TODO: drop the debug logging above

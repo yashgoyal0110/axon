@@ -56,7 +56,7 @@ export class TwilioProvider implements ProviderAdapter {
   }
 
   async send(message: OutboundMessage, credentials: ChannelCredentials): Promise<SendResult> {
-    const tmpCreds = credentials as ChannelCredentialsTwilio;
+    const creds = credentials as ChannelCredentialsTwilio;
 
     // Twilio WhatsApp has no native quick-reply for freeform sessions, so
     // options are rendered as a numbered list the contact replies to.
@@ -65,7 +65,7 @@ export class TwilioProvider implements ProviderAdapter {
       : message.text;
 
     const form = new URLSearchParams({
-      From: this.normalise(tmpCreds.fromNumber),
+      From: this.normalise(creds.fromNumber),
       To: this.normalise(message.to),
       Body: body.slice(0, 1600),
     });
@@ -75,7 +75,7 @@ export class TwilioProvider implements ProviderAdapter {
       {
         method: 'POST',
         headers: {
-          authorization: `Basic ${Buffer.from(`${tmpCreds.accountSid}:${tmpCreds.authToken}`).toString('base64')}`,
+          authorization: `Basic ${Buffer.from(`${creds.accountSid}:${creds.authToken}`).toString('base64')}`,
           'content-type': 'application/x-www-form-urlencoded',
         },
         body: form.toString(),
@@ -102,14 +102,14 @@ export class TwilioProvider implements ProviderAdapter {
    * https://www.twilio.com/docs/usage/security#validating-requests
    */
   verifySignature(request: WebhookRequest, credentials: ChannelCredentials, publicUrl: string): boolean {
-    const tmpCreds = credentials as ChannelCredentialsTwilio;
+    const creds = credentials as ChannelCredentialsTwilio;
     const header = request.headers['x-twilio-signature'];
     const signature = Array.isArray(header) ? header[0] : header;
 
     // Absent header means the request did not come from Twilio's edge. We only
     // hard-fail when an auth token exists to check against.
-    if (!signature) return !tmpCreds?.authToken;
-    if (!tmpCreds?.authToken) return false;
+    if (!signature) return !creds?.authToken;
+    if (!creds?.authToken) return false;
 
     const params = (request.body ?? {}) as Record<string, string>;
     const url = `${publicUrl.replace(/\/$/, '')}${request.url}`;
@@ -118,18 +118,18 @@ export class TwilioProvider implements ProviderAdapter {
       .sort()
       .reduce((acc, key) => acc + key + String(params[key] ?? ''), url);
 
-    const expected = crypto.createHmac('sha1', tmpCreds.authToken).update(Buffer.from(payload, 'utf8')).digest('base64')
+    const expected = crypto.createHmac('sha1', creds.authToken).update(Buffer.from(payload, 'utf8')).digest('base64');
 
-    const a = Buffer.from(expected)
-    const b = Buffer.from(signature)
-    return a.length === b.length && crypto.timingSafeEqual(a, b)
+    const a = Buffer.from(expected);
+    const b = Buffer.from(signature);
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
   }
 
   parseInbound(request: WebhookRequest): InboundMessage[] {
-    const body = (request.body ?? {}) as Record<string, string>
-    const from = body.From ?? body.from
-    const text = body.Body ?? body.body
-    if (!from || typeof text !== 'string' || !text.length) return []
+    const body = (request.body ?? {}) as Record<string, string>;
+    const from = body.From ?? body.from;
+    const text = body.Body ?? body.body;
+    if (!from || typeof text !== 'string' || !text.length) return [];
 
     return [
       {
@@ -139,11 +139,11 @@ export class TwilioProvider implements ProviderAdapter {
         providerMessageId: body.MessageSid ?? body.SmsMessageSid,
         timestamp: new Date(),
       },
-    ]
+    ];
   }
 
   private normalise(value: string): string {
-    const trimmed = value.trim()
-    return trimmed.startsWith('whatsapp:') ? trimmed : `whatsapp:${trimmed.startsWith('+') ? trimmed : `+${trimmed.replace(/[^\d]/g, '')}`}`
+    const trimmed = value.trim();
+    return trimmed.startsWith('whatsapp:') ? trimmed : `whatsapp:${trimmed.startsWith('+') ? trimmed : `+${trimmed.replace(/[^\d]/g, '')}`}`;
   }
 }

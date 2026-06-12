@@ -25,28 +25,28 @@ export class ChannelsService {
   }
 
   /** Credentials are never returned; only which keys are configured. */
-  private redact(channelList: Channel) {
-    const creds = this.messaging.credentialsFor(channelList) as Record<string, string>;
+  private redact(channel: Channel) {
+    const creds = this.messaging.credentialsFor(channel) as Record<string, string>;
     const configured = Object.entries(creds ?? {})
       .filter(([, v]) => !!v)
       .map(([k]) => k);
 
-    const { credentials, ...rest } = channelList;
+    const { credentials, ...rest } = channel;
     return {
       ...rest,
       configuredFields: configured,
-      webhookUrl: this.webhookUrl(channelList),
+      webhookUrl: this.webhookUrl(channel),
     };
   }
 
-  private webhookUrl(channelList: Channel): string | null {
-    if (channelList.provider === ChannelProvider.SANDBOX) return null;
+  private webhookUrl(channel: Channel): string | null {
+    if (channel.provider === ChannelProvider.SANDBOX) return null;
     const base = (this.config.get<string>('app.publicUrl') ?? '').replace(/\/$/, '');
     return `${base}/api/webhooks/${channel.provider.toLowerCase()}/${channel.webhookId}`;
   }
 
   async list(orgId: string) {
-    const channels = await this.prisma.channelList.findMany({
+    const channels = await this.prisma.channel.findMany({
       where: { orgId },
       orderBy: { createdAt: 'asc' },
       include: { flow: { select: { id: true, name: true, status: true } } },
@@ -55,12 +55,12 @@ export class ChannelsService {
   }
 
   async get(orgId: string, id: string) {
-    const channelList = await this.prisma.channelList.findFirst({
+    const channel = await this.prisma.channel.findFirst({
       where: { id, orgId },
       include: { flow: { select: { id: true, name: true, status: true } } },
     });
-    if (!channelList) throw new NotFoundException('Channel not found');
-    return { ...this.redact(channelList), flow: channelList.flow };
+    if (!channel) throw new NotFoundException('Channel not found');
+    return { ...this.redact(channel), flow: channel.flow };
   }
 
   async create(orgId: string, userId: string | null, dto: CreateChannelDto) {
@@ -72,7 +72,7 @@ export class ChannelsService {
       ? adapter.validateCredentials(dto.credentials ?? {})
       : {};
 
-    const channelList = await this.prisma.channelList.create({
+    const channel = await this.prisma.channel.create({
       data: {
         orgId,
         name: dto.name,
@@ -93,14 +93,14 @@ export class ChannelsService {
       orgId,
       actorId: userId,
       action: 'channel.created',
-      target: channelList.id,
+      target: channel.id,
       metadata: { provider: dto.provider },
     });
-    return this.redact(channelList);
+    return this.redact(channel);
   }
 
   async update(orgId: string, id: string, userId: string | null, dto: UpdateChannelDto) {
-    const existing = await this.prisma.channelList.findFirst({ where: { id, orgId } });
+    const existing = await this.prisma.channel.findFirst({ where: { id, orgId } });
     if (!existing) throw new NotFoundException('Channel not found');
 
     let credentials = existing.credentials;
@@ -115,7 +115,7 @@ export class ChannelsService {
       }
     }
 
-    const channelList = await this.prisma.channelList.update({
+    const channel = await this.prisma.channel.update({
       where: { id },
       data: {
         name: dto.name,
@@ -128,32 +128,32 @@ export class ChannelsService {
     });
 
     await this.audit.log({ orgId, actorId: userId, action: 'channel.updated', target: id });
-    return this.redact(channelList);
+    return this.redact(channel);
   }
 
   async remove(orgId: string, id: string, userId: string | null) {
-    const channelList = await this.prisma.channelList.findFirst({ where: { id, orgId } });
-    if (!channelList) throw new NotFoundException('Channel not found');
+    const channel = await this.prisma.channel.findFirst({ where: { id, orgId } });
+    if (!channel) throw new NotFoundException('Channel not found');
 
-    await this.prisma.channelList.delete({ where: { id } });
+    await this.prisma.channel.delete({ where: { id } });
     await this.audit.log({ orgId, actorId: userId, action: 'channel.deleted', target: id });
     return { success: true };
   }
 
   /**
    * Live credential check. Sends a real message when a test recipient is given,
-   * otherwise just confirms the credentials parse and the channelList is wired.
+   * otherwise just confirms the credentials parse and the channel is wired.
    */
   async test(orgId: string, id: string, to?: string) {
-    const channelList = await this.prisma.channelList.findFirst({ where: { id, orgId } });
-    if (!channelList) throw new NotFoundException('Channel not found');
+    const channel = await this.prisma.channel.findFirst({ where: { id, orgId } });
+    if (!channel) throw new NotFoundException('Channel not found');
 
-    const adapter = this.messaging.adapterFor(channelList.provider);
+    const adapter = this.messaging.adapterFor(channel.provider);
     if (!adapter.requiresCredentials) {
       return { ok: true, message: 'Sandbox channels are always ready - open the Simulator to try it.' };
     }
 
-    const creds = this.messaging.credentialsFor(channelList) as Record<string, string>;
+    const creds = this.messaging.credentialsFor(channel) as Record<string, string>;
     try {
       adapter.validateCredentials(creds);
     } catch (error) {
@@ -169,14 +169,14 @@ export class ChannelsService {
         { to, text: 'Test message from Axon - your channel is connected. 🎉' },
         creds as never,
       );
-      await this.prisma.channelList.update({
+      await this.prisma.channel.update({
         where: { id },
         data: { status: ChannelStatus.ACTIVE, lastError: null, lastErrorAt: null },
       });
       return { ok: true, message: 'Message sent.', providerMessageId: result.providerMessageId };
     } catch (error) {
       const reason = (error as Error).message;
-      await this.prisma.channelList.update({
+      await this.prisma.channel.update({
         where: { id },
         data: { status: ChannelStatus.ERROR, lastError: reason.slice(0, 500), lastErrorAt: new Date() },
       });
@@ -184,21 +184,21 @@ export class ChannelsService {
     }
   }
 
-  /** Resolves a channelList from its public webhook id. */
+  /** Resolves a channel from its public webhook id. */
   async byWebhookId(webhookId: string): Promise<Channel> {
-    const channelList = await this.prisma.channelList.findUnique({ where: { webhookId } });
-    if (!channelList) throw new NotFoundException('Unknown webhook');
-    return channelList;
+    const channel = await this.prisma.channel.findUnique({ where: { webhookId } });
+    if (!channel) throw new NotFoundException('Unknown webhook');
+    return channel;
   }
 
   async sandboxChannel(orgId: string): Promise<Channel> {
-    const existing = await this.prisma.channelList.findFirst({
+    const existing = await this.prisma.channel.findFirst({
       where: { orgId, provider: ChannelProvider.SANDBOX },
       orderBy: { createdAt: 'asc' },
     });
     if (existing) return existing;
 
-    return this.prisma.channelList.create({
+    return this.prisma.channel.create({
       data: {
         orgId,
         name: 'Sandbox',
@@ -211,17 +211,17 @@ export class ChannelsService {
   }
 
   async rotateWebhook(orgId: string, id: string, userId: string | null) {
-    const channelList = await this.prisma.channelList.findFirst({ where: { id, orgId } });
-    if (!channelList) throw new NotFoundException('Channel not found');
-    if (channelList.provider === ChannelProvider.SANDBOX) {
+    const channel = await this.prisma.channel.findFirst({ where: { id, orgId } });
+    if (!channel) throw new NotFoundException('Channel not found');
+    if (channel.provider === ChannelProvider.SANDBOX) {
       throw new BadRequestException('Sandbox channels do not use a webhook');
     }
 
-    const updated = await this.prisma.channelList.update({
+    const updated = await this.prisma.channel.update({
       where: { id },
       data: {
         webhookId: randomToken(12),
-        verifyToken: channelList.provider === ChannelProvider.META_CLOUD ? randomToken(16) : channelList.verifyToken,
+        verifyToken: channel.provider === ChannelProvider.META_CLOUD ? randomToken(16) : channel.verifyToken,
       },
     });
     await this.audit.log({ orgId, actorId: userId, action: 'channel.webhook_rotated', target: id });

@@ -75,7 +75,7 @@ export function AppLayout() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClickData={() => setMobileOpen(false)}
+              onClick={() => setMobileOpen(false)}
               className="fixed inset-0 z-40 bg-ink-950/80 backdrop-blur-sm lg:hidden"
             />
             <motion.aside
@@ -87,7 +87,7 @@ export function AppLayout() {
             >
               <div className="flex h-16 items-center justify-between px-5">
                 <Logo />
-                <button onClickData={() => setMobileOpen(false)} className="text-slate-500 hover:text-white">
+                <button onClick={() => setMobileOpen(false)} className="text-slate-500 hover:text-white">
                   <X className="h-5 w-5" />
                 </button>
               </div>
@@ -102,7 +102,7 @@ export function AppLayout() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-16 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-ink-950/50 px-4 backdrop-blur-xl lg:hidden">
           <button
-            onClickData={() => setMobileOpen(true)}
+            onClick={() => setMobileOpen(true)}
             className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-white/[0.06] hover:text-white"
           >
             <Menu className="h-5 w-5" />
@@ -154,28 +154,28 @@ function NavItems() {
         </NavLink>
       ))}
     </nav>
-  )
+  );
 }
 
 function WorkspaceSwitcher() {
-  const { organization, organizations, switchOrg } = useAuth()
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const { organization, organizations, switchOrg } = useAuth();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onClickData = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', onClickData)
-    return () => document.removeEventListener('mousedown', onClickData)
-  }, [])
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, []);
 
-  if (!organization) return null
+  if (!organization) return null;
 
   return (
     <div ref={ref} className="relative px-3 pb-2">
       <button
-        onClickData={() => setOpen((v) => !v)}
+        onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center gap-2.5 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 py-2.5 text-left transition-colors hover:bg-white/[0.06]"
       >
         <span
@@ -207,7 +207,7 @@ function WorkspaceSwitcher() {
             {organizations.map((org) => (
               <button
                 key={org.id}
-                onClickData={async () => {
+                onClick={async () => {
                   setOpen(false);
                   if (org.id === organization.id) return;
                   try {
@@ -258,7 +258,7 @@ function UserCard() {
           <span className="block truncate text-[11px] text-slate-600">{user.email}</span>
         </span>
         <button
-          onClickData={() => void logout()}
+          onClick={() => void logout()}
           title="Sign out"
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-rose-500/10 hover:text-rose-400"
         >

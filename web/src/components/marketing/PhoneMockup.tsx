@@ -215,39 +215,39 @@ export function PhoneMockup({
               <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-ink-950">
                 <path d="M2 21l21-9L2 3v7l15 2-15 2z" />
               </svg>
-                        </div>
-                    </div>
-                </div>
             </div>
-
-            {/* Floating stat chips anchored to the device */}
-            <FloatingChip className="-left-6 top-24 sm:-left-16" delay={0.8} label="Response time" value="0.4s" />
-            <FloatingChip className="-right-4 bottom-32 sm:-right-14" delay={1.3} label="Resolved by AI" value="73%" tone="violet" />
+          </div>
         </div>
-    );
+      </div>
+
+      {/* Floating stat chips anchored to the device */}
+      <FloatingChip className="-left-6 top-24 sm:-left-16" delay={0.8} label="Response time" value="0.4s" />
+      <FloatingChip className="-right-4 bottom-32 sm:-right-14" delay={1.3} label="Resolved by AI" value="73%" tone="violet" />
+    </div>
+  );
 }
 
 function FloatingChip({
-    className,
-    label,
-    value,
-    delay = 0,
-    tone = 'mint',
+  className,
+  label,
+  value,
+  delay = 0,
+  tone = 'mint',
 }: {
-    className?: string;
-    label: string;
-    value: string;
-    delay?: number;
-    tone?: 'mint' | 'violet';
+  className?: string;
+  label: string;
+  value: string;
+  delay?: number;
+  tone?: 'mint' | 'violet';
 }) {
-    return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.85, y: 14 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className={cn('absolute hidden animate-float lg:block', className)}
-            style={{ animationDelay: `${delay}s` }}
-        >
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.85, y: 14 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ delay, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className={cn('absolute hidden animate-float lg:block', className)}
+      style={{ animationDelay: `${delay}s` }}
+    >
       <div className="rounded-xl border border-white/10 bg-ink-850/85 px-3.5 py-2.5 shadow-lift backdrop-blur-xl">
         <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">{label}</p>
         <p className={cn('mt-0.5 font-display text-lg font-bold', tone === 'mint' ? 'text-mint-300' : 'text-violet-300')}>

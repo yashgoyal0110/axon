@@ -41,7 +41,7 @@ export function MarketingLayout() {
   const { pathname } = useLocation();
   const status = useAuth((s) => s.status);
   const { scrollY } = useScroll();
-  const blurValue = useTransform(scrollY, [0, 80], [0, 16]);
+  const blur = useTransform(scrollY, [0, 80], [0, 16]);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => setOpen(false), [pathname]);
@@ -58,7 +58,7 @@ export function MarketingLayout() {
       <Backdrop />
 
       <motion.header
-        style={{ backdropFilter: blurValue.get() ? `blur(${blur.get()}px)` : undefined }}
+        style={{ backdropFilter: blur.get() ? `blur(${blur.get()}px)` : undefined }}
         className={cn(
           'fixed inset-x-0 top-0 z-50 transition-all duration-300',
           scrolled ? 'border-b border-white/[0.07] bg-ink-950/70 backdrop-blur-xl' : 'border-b border-transparent',
@@ -90,26 +90,26 @@ export function MarketingLayout() {
                     )}
                     <span className="relative">{item.label}</span>
                   </>
-                                )}
-                            </NavLink>
-                        ))}
-                    </nav>
+                )}
+              </NavLink>
+            ))}
+          </nav>
 
-                    <div className="ml-auto flex items-center gap-2">
-                        {status === 'authenticated' ? (
-                            <Link to="/app">
-                                <Button size="sm" iconRight={ArrowRight}>
-                                    Open app
-                                </Button>
-                            </Link>
-                        ) : (
-                            <>
-                                <Link to="/login" className="hidden sm:block">
-                                    <Button variant="ghost" size="sm">
-                                        Sign in
-                                    </Button>
-                                </Link>
-                                <Link to="/register">
+          <div className="ml-auto flex items-center gap-2">
+            {status === 'authenticated' ? (
+              <Link to="/app">
+                <Button size="sm" iconRight={ArrowRight}>
+                  Open app
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/login" className="hidden sm:block">
+                  <Button variant="ghost" size="sm">
+                    Sign in
+                  </Button>
+                </Link>
+                <Link to="/register">
                   <Button size="sm">Start free</Button>
                 </Link>
               </>
@@ -250,12 +250,3 @@ function Footer() {
     </footer>
   );
 }
-
-
-// kept around until the new implementation is verified
-const NAVV1 = [
-  { to: '/product', label: 'Product' },
-  { to: '/templates', label: 'Templates' },
-  { to: '/pricing', label: 'Pricing' },
-  { to: '/docs', label: 'Docs' },
-];

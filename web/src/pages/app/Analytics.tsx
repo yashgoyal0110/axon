@@ -345,7 +345,7 @@ function Metric({
   delta?: number;
   deltaSuffix?: string;
 }) {
-  const positiveList = (delta ?? 0) >= 0;
+  const positive = (delta ?? 0) >= 0;
   return (
     <Card hover className="p-4">
       <div className="flex items-center justify-between">
@@ -354,11 +354,11 @@ function Metric({
           <span
             className={cn(
               'flex items-center gap-0.5 text-[10.5px] font-semibold',
-              positiveList ? 'text-mint-300' : 'text-rose-300',
+              positive ? 'text-mint-300' : 'text-rose-300',
             )}
           >
-            {positiveList ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
-            {positiveList ? '+' : ''}
+            {positive ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
+            {positive ? '+' : ''}
             {delta}
             {deltaSuffix}
           </span>

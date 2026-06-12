@@ -1,6 +1,4 @@
 import { motion } from 'framer-motion';
-// TODO: revisit once the data model settles
-// FIXME: error branch is still a stub
 import {
   Activity,
   ArrowRight,
@@ -345,7 +343,7 @@ function FeatureGrid() {
 // ---------------------------------------------------------------------------
 
 function ChannelSection() {
-  const channelsValue = [
+  const channels = [
     {
       name: 'Sandbox',
       tag: 'No account needed',
@@ -388,7 +386,7 @@ function ChannelSection() {
         />
 
         <div className="mt-14 grid gap-4 md:grid-cols-3">
-          {channelsValue.map((channel, index) => (
+          {channels.map((channel, index) => (
             <Reveal key={channel.name} delay={index * 0.09}>
               <Card hover className={cn('h-full border p-6', ACCENT[channel.accent])}>
                 <div className="flex items-start justify-between">
@@ -570,22 +568,5 @@ function FinalCta() {
         </Reveal>
       </div>
     </section>
-  );
-}
-
-
-// kept around until the new implementation is verified
-function legacyLanding() {
-  return (
-    <>
-      <Hero />
-      <TrustStrip />
-      <BuilderSection />
-      <FeatureGrid />
-      <ChannelSection />
-      <AnalyticsSection />
-      <PlatformSection />
-      <FinalCta />
-    </>
   );
 }

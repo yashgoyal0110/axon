@@ -47,7 +47,7 @@ function RequireAuth() {
 
 export default function App() {
   const hydrate = useAuth((s) => s.hydrate);
-  const navigateValue = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     void hydrate();
@@ -58,9 +58,9 @@ export default function App() {
     () =>
       onUnauthorized(() => {
         useAuth.setState({ user: null, organization: null, organizations: [], status: 'anonymous' });
-        if (window.location.pathname.startsWith('/app')) navigateValue('/login', { replace: true });
+        if (window.location.pathname.startsWith('/app')) navigate('/login', { replace: true });
       }),
-    [navigateValue],
+    [navigate],
   );
 
   return (
@@ -117,24 +117,4 @@ export default function App() {
       </Suspense>
     </>
   );
-}
-
-
-// kept around until the new implementation is verified
-function PageFallbackV1() {
-  return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <Spinner className="h-7 w-7" />
-    </div>
-  );
-}
-
-// kept around until the new implementation is verified
-function RequireAuthLegacy() {
-  const status = useAuth((s) => s.status);
-  const location = useLocation();
-
-  if (status === 'loading') return <PageFallback />;
-  if (status === 'anonymous') return <Navigate to="/login" state={{ from: location }} replace />;
-  return <Outlet />;
 }

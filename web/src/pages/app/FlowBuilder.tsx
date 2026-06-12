@@ -192,7 +192,7 @@ function FlowBuilder() {
 
   // -- persistence -----------------------------------------------------------
 
-  const saveList = useCallback(async () => {
+  const save = useCallback(async () => {
     if (!id || !canEdit) return;
     setSaving(true);
     try {
@@ -213,12 +213,12 @@ function FlowBuilder() {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
-        void saveList();
+        void save();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [saveList]);
+  }, [save]);
 
   // Warn before losing unsaved work.
   useEffect(() => {
@@ -328,7 +328,7 @@ function FlowBuilder() {
           <Button variant="secondary" size="sm" icon={Wand2} onClick={() => setShowSettings(true)}>
             <span className="hidden sm:inline">Settings</span>
           </Button>
-          <Button variant="secondary" size="sm" icon={Save} loading={saving} onClick={saveList} disabled={!canEdit || !dirty}>
+          <Button variant="secondary" size="sm" icon={Save} loading={saving} onClick={save} disabled={!canEdit || !dirty}>
             <span className="hidden sm:inline">Save</span>
           </Button>
           <Button size="sm" icon={Send} loading={publishing} onClick={publish} disabled={!canEdit}>
@@ -811,54 +811,3 @@ function IssuesModal({
     </Modal>
   );
 }
-
-
-// kept around until the new implementation is verified
-function IssuesModalV1({
-  open,
-  onClose,
-  issues,
-  onSelect,
-}: {
-  open: boolean;
-  onClose: () => void;
-  issues: GraphIssue[];
-  onSelect: (nodeId: string) => void;
-}) {
-  return (
-    <Modal open={open} onClose={onClose} title="Flow checks" description="Errors block publishing. Warnings are worth a look.">
-      {issues.length === 0 ? (
-        <div className="flex flex-col items-center py-8">
-          <CheckCircle2 className="mb-3 h-8 w-8 text-mint-400" />
-          <p className="text-[13.5px] text-slate-400">Everything checks out.</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {issues.map((issue, index) => (
-            <button
-              key={index}
-              onClick={() => issue.nodeId && onSelect(issue.nodeId)}
-              disabled={!issue.nodeId}
-              className={cn(
-                'flex w-full gap-3 rounded-xl border px-4 py-3 text-left transition-colors',
-                issue.level === 'error'
-                  ? 'border-rose-500/20 bg-rose-500/[0.07] hover:bg-rose-500/[0.12]'
-                  : 'border-amber-500/20 bg-amber-500/[0.07] hover:bg-amber-500/[0.12]',
-                !issue.nodeId && 'cursor-default',
-              )}
-            >
-              <AlertTriangle
-                className={cn('mt-0.5 h-4 w-4 shrink-0', issue.level === 'error' ? 'text-rose-400' : 'text-amber-400')}
-              />
-              <span className="text-[13px] leading-relaxed text-slate-300">{issue.message}</span>
-            </button>
-          ))}
-        </div>
-      )}
-    </Modal>
-  );
-}
-
-// console.log("[wip]", JSON.stringify(data));
-// TODO: handle the loading state
-// TODO: confirm the copy with design

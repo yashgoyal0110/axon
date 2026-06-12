@@ -180,7 +180,7 @@ function TeamTab() {
     }
   };
 
-  const removeData = async (userId: string) => {
+  const remove = async (userId: string) => {
     try {
       await del(`/org/members/${userId}`);
       toast.success('Member removed');
@@ -248,7 +248,7 @@ function TeamTab() {
                       ))}
                     </Select>
                     <button
-                      onClick={() => removeData(member.user.id)}
+                      onClick={() => remove(member.user.id)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-rose-500/10 hover:text-rose-400"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -711,12 +711,3 @@ function AccountTab() {
     </div>
   );
 }
-
-
-// kept around until the new implementation is verified
-const ROLE_HELPV1: Record<Role, string> = {
-  OWNER: 'Full control, including billing and deleting the workspace.',
-  ADMIN: 'Manage channels, team, API keys and everything below.',
-  AGENT: 'Build flows and reply to conversations.',
-  VIEWER: 'Read-only access to flows, inbox and analytics.',
-};

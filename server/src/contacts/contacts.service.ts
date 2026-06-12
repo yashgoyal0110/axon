@@ -15,7 +15,7 @@ export class ContactsService {
     const page = Math.max(1, Number(query.page) || 1);
     const pageSize = Math.min(200, Math.max(1, Number(query.pageSize) || 25));
 
-    const whereList: Prisma.ContactWhereInput = {
+    const where: Prisma.ContactWhereInput = {
       orgId,
       ...(query.tag ? { tags: { has: query.tag } } : {}),
       ...(query.search
@@ -30,13 +30,13 @@ export class ContactsService {
 
     const [items, total] = await Promise.all([
       this.prisma.contact.findMany({
-        whereList,
+        where,
         orderBy: { lastSeenAt: 'desc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
         include: { _count: { select: { conversations: true } } },
       }),
-      this.prisma.contact.count({ whereList }),
+      this.prisma.contact.count({ where }),
     ]);
 
     return paginate(items, total, page, pageSize);
@@ -44,7 +44,7 @@ export class ContactsService {
 
   async get(orgId: string, id: string) {
     const contact = await this.prisma.contact.findFirst({
-      whereList: { id, orgId },
+      where: { id, orgId },
       include: {
         conversations: {
           orderBy: { lastMessageAt: 'desc' },
@@ -63,11 +63,11 @@ export class ContactsService {
     dto: { name?: string; tags?: string[]; optedOut?: boolean; attributes?: Record<string, unknown> },
     userId: string | null,
   ) {
-    const contact = await this.prisma.contact.findFirst({ whereList: { id, orgId } });
+    const contact = await this.prisma.contact.findFirst({ where: { id, orgId } });
     if (!contact) throw new NotFoundException('Contact not found');
 
     const updated = await this.prisma.contact.update({
-      whereList: { id },
+      where: { id },
       data: {
         name: dto.name,
         tags: dto.tags,
@@ -80,10 +80,10 @@ export class ContactsService {
   }
 
   async remove(orgId: string, id: string, userId: string | null) {
-    const contact = await this.prisma.contact.findFirst({ whereList: { id, orgId } });
+    const contact = await this.prisma.contact.findFirst({ where: { id, orgId } });
     if (!contact) throw new NotFoundException('Contact not found');
 
-    await this.prisma.contact.delete({ whereList: { id } });
+    await this.prisma.contact.delete({ where: { id } });
     await this.audit.log({ orgId, actorId: userId, action: 'contact.deleted', target: id });
     return { success: true };
   }
@@ -91,7 +91,7 @@ export class ContactsService {
   /** CSV export for the contacts table. */
   async exportCsv(orgId: string): Promise<string> {
     const contacts = await this.prisma.contact.findMany({
-      whereList: { orgId },
+      where: { orgId },
       orderBy: { createdAt: 'asc' },
       take: 50_000,
     });
@@ -118,7 +118,7 @@ export class ContactsService {
   }
 
   async tags(orgId: string): Promise<string[]> {
-    const contacts = await this.prisma.contact.findMany({ whereList: { orgId }, select: { tags: true } });
+    const contacts = await this.prisma.contact.findMany({ where: { orgId }, select: { tags: true } });
     return [...new Set(contacts.flatMap((c) => c.tags))].sort();
   }
 }

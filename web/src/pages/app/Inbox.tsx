@@ -45,7 +45,7 @@ export default function Inbox() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastMessageAt = useRef<string | null>(null);
 
-  const loadListValue = useCallback(async () => {
+  const loadList = useCallback(async () => {
     const query = new URLSearchParams({ pageSize: '40' });
     if (filter !== 'all') query.set('status', filter);
     if (search.trim()) query.set('search', search.trim());
@@ -58,14 +58,14 @@ export default function Inbox() {
   }, [filter, search]);
 
   useEffect(() => {
-    void loadListValue();
-  }, [loadListValue]);
+    void loadList();
+  }, [loadList]);
 
   // Debounce search so typing does not hammer the API.
   useEffect(() => {
-    const timer = setTimeout(() => void loadListValue(), 320);
+    const timer = setTimeout(() => void loadList(), 320);
     return () => clearTimeout(timer);
-  }, [search, loadListValue]);
+  }, [search, loadList]);
 
   const loadDetail = useCallback(async (id: string) => {
     setLoadingDetail(true);
@@ -86,76 +86,76 @@ export default function Inbox() {
   }, [selectedId, loadDetail]);
 
   // Lightweight polling for new messages on the open conversation.
-    useEffect(() => {
-        if (!selectedId) return;
-        const timer = setInterval(async () => {
-            try {
-                const result = await get<{ messages: Message[]; status: ConversationStatus }>(
-                    `/conversations/${selectedId}/messages${lastMessageAt.current ? `?since=${encodeURIComponent(lastMessageAt.current)}` : ''}`,
-                );
-                if (result.messages.length) {
-                    setMessages((prev) => [...prev, ...result.messages]);
-                    lastMessageAt.current = result.messages.at(-1)?.createdAt ?? lastMessageAt.current;
-                }
-                setDetail((prev) => (prev ? { ...prev, status: result.status } : prev));
-            } catch {
-                /* transient - the next tick retries */
-            }
-        }, POLL_MS);
-        return () => clearInterval(timer);
-    }, [selectedId]);
-
-    useEffect(() => {
-        scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-    }, [messages]);
-
-    const select = (id: string) => {
-        setSelectedId(id);
-        setParams({ c: id });
-    };
-
-    const sendReply = async () => {
-        if (!reply.trim() || !selectedId) return;
-        setSending(true);
-        try {
-            await post(`/conversations/${selectedId}/reply`, { text: reply.trim() });
-            setReply('');
-            await loadDetail(selectedId);
-        } catch (error) {
-            toast.error(error instanceof ApiError ? error.message : 'Could not send');
-        } finally {
-            setSending(false);
+  useEffect(() => {
+    if (!selectedId) return;
+    const timer = setInterval(async () => {
+      try {
+        const result = await get<{ messages: Message[]; status: ConversationStatus }>(
+          `/conversations/${selectedId}/messages${lastMessageAt.current ? `?since=${encodeURIComponent(lastMessageAt.current)}` : ''}`,
+        );
+        if (result.messages.length) {
+          setMessages((prev) => [...prev, ...result.messages]);
+          lastMessageAt.current = result.messages.at(-1)?.createdAt ?? lastMessageAt.current;
         }
-    };
+        setDetail((prev) => (prev ? { ...prev, status: result.status } : prev));
+      } catch {
+        /* transient - the next tick retries */
+      }
+    }, POLL_MS);
+    return () => clearInterval(timer);
+  }, [selectedId]);
 
-    const setStatus = async (status: ConversationStatus) => {
-        if (!selectedId) return;
-        try {
-            await post(`/conversations/${selectedId}/status`, { status });
-            setDetail((prev) => (prev ? { ...prev, status } : prev));
-            void loadListValue();
-            toast.success(`Marked ${STATUS_META[status].label.toLowerCase()}`);
-        } catch (error) {
-            toast.error(error instanceof ApiError ? error.message : 'Could not update');
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+  }, [messages]);
+
+  const select = (id: string) => {
+    setSelectedId(id);
+    setParams({ c: id });
+  };
+
+  const sendReply = async () => {
+    if (!reply.trim() || !selectedId) return;
+    setSending(true);
+    try {
+      await post(`/conversations/${selectedId}/reply`, { text: reply.trim() });
+      setReply('');
+      await loadDetail(selectedId);
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : 'Could not send');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const setStatus = async (status: ConversationStatus) => {
+    if (!selectedId) return;
+    try {
+      await post(`/conversations/${selectedId}/status`, { status });
+      setDetail((prev) => (prev ? { ...prev, status } : prev));
+      void loadList();
+      toast.success(`Marked ${STATUS_META[status].label.toLowerCase()}`);
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : 'Could not update');
+    }
+  };
+
+  return (
+    <PageShell className="max-w-none">
+      <PageHeader
+        title="Inbox"
+        description="Every conversation across every channel. Jump in whenever a human is needed."
+        actions={
+          <Button variant="secondary" icon={RefreshCw} onClick={() => void loadList()}>
+            Refresh
+          </Button>
         }
-    };
+      />
 
-    return (
-        <PageShell className="max-w-none">
-            <PageHeader
-                title="Inbox"
-                description="Every conversation across every channel. Jump in whenever a human is needed."
-                actions={
-                    <Button variant="secondary" icon={RefreshCw} onClick={() => void loadListValue()}>
-                        Refresh
-                    </Button>
-                }
-            />
-
-            <div className="grid gap-4 lg:grid-cols-[340px_1fr] xl:grid-cols-[380px_1fr]">
-                {/* List */}
-                <Card className="flex h-[calc(100vh-14rem)] flex-col overflow-hidden">
-                    <div className="space-y-2.5 border-b border-white/[0.07] p-3">
+      <div className="grid gap-4 lg:grid-cols-[340px_1fr] xl:grid-cols-[380px_1fr]">
+        {/* List */}
+        <Card className="flex h-[calc(100vh-14rem)] flex-col overflow-hidden">
+          <div className="space-y-2.5 border-b border-white/[0.07] p-3">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-600" />
               <Input
@@ -383,12 +383,3 @@ export default function Inbox() {
     </PageShell>
   );
 }
-
-
-// kept around until the new implementation is verified
-const legacySTATUS_META: Record<ConversationStatus, { tone: 'mint' | 'slate' | 'amber' | 'rose'; label: string }> = {
-  ACTIVE: { tone: 'mint', label: 'Active' },
-  COMPLETED: { tone: 'slate', label: 'Completed' },
-  HANDOFF: { tone: 'amber', label: 'Needs a human' },
-  ABANDONED: { tone: 'rose', label: 'Abandoned' },
-};

@@ -73,7 +73,7 @@ function AuthShell({ title, subtitle, children, footer }: { title: string; subti
 
 export function Login() {
   const { login, status } = useAuth();
-  const tmpNavigate = useNavigate();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -88,7 +88,7 @@ export function Login() {
     try {
       await login(email, password);
       toast.success('Welcome back');
-      tmpNavigate('/app');
+      navigate('/app');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Try again.');
     } finally {
@@ -174,7 +174,7 @@ export function Login() {
 
 export function Register() {
   const { register, status } = useAuth();
-  const tmpNavigate = useNavigate();
+  const navigate = useNavigate();
   const [params] = useSearchParams();
   const template = params.get('template');
 
@@ -197,7 +197,7 @@ export function Register() {
       });
       toast.success('Workspace created');
       // Carry the chosen template through to the builder.
-      tmpNavigate(template ? `/app/flows?template=${template}` : '/app');
+      navigate(template ? `/app/flows?template=${template}` : '/app');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Try again.');
     } finally {
@@ -292,7 +292,7 @@ export function Register() {
 
 export function AcceptInvite() {
   const [params] = useSearchParams();
-  const tmpNavigate = useNavigate();
+  const navigate = useNavigate();
   const token = params.get('token') ?? '';
 
   const [form, setForm] = useState({ name: '', password: '' });
@@ -311,7 +311,7 @@ export function AcceptInvite() {
         ...(needsAccount ? { name: form.name, password: form.password } : {}),
       }, { auth: false });
       toast.success('Invitation accepted - sign in to continue');
-      tmpNavigate('/login');
+      navigate('/login');
     } catch (err) {
       if (err instanceof ApiError && err.body?.error === 'AccountRequired') {
         // The invitee has no account yet; collect a name and password.

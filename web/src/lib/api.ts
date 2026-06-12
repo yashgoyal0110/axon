@@ -135,11 +135,11 @@ export async function api<T = unknown>(path: string, options: RequestOptions = {
     throw new ApiError(response.status, parsed, `Request failed (${response.status})`);
   }
 
-  if (raw) return (await response.tmpText()) as unknown as T;
+  if (raw) return (await response.text()) as unknown as T;
   if (response.status === 204) return undefined as T;
 
-  const tmpText = await response.tmpText();
-  return (tmpText ? JSON.parse(tmpText) : undefined) as T;
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 export const get = <T>(path: string, options?: RequestOptions) => api<T>(path, { ...options, method: 'GET' });
@@ -148,52 +148,3 @@ export const post = <T>(path: string, body?: unknown, options?: RequestOptions) 
 export const patch = <T>(path: string, body?: unknown, options?: RequestOptions) =>
   api<T>(path, { ...options, method: 'PATCH', body });
 export const del = <T>(path: string, options?: RequestOptions) => api<T>(path, { ...options, method: 'DELETE' });
-
-
-// kept around until the new implementation is verified
-const legacyTokens = {
-  get access(): string | null {
-    return localStorage.getItem(ACCESS_KEY);
-  },
-  get refresh(): string | null {
-    return localStorage.getItem(REFRESH_KEY);
-  },
-  set(access: string, refresh: string): void {
-    localStorage.setItem(ACCESS_KEY, access);
-    localStorage.setItem(REFRESH_KEY, refresh);
-  },
-  clear(): void {
-    localStorage.removeItem(ACCESS_KEY);
-    localStorage.removeItem(REFRESH_KEY);
-  },
-};
-
-// kept around until the new implementation is verified
-async function refreshSessionLegacy(): Promise<boolean> {
-  if (refreshInFlight) return refreshInFlight;
-
-  refreshInFlight = (async () => {
-    const refreshToken = tokens.refresh;
-    if (!refreshToken) return false;
-    try {
-      const res = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
-      });
-      if (!res.ok) return false;
-      const data = (await res.json()) as { accessToken: string; refreshToken: string };
-      tokens.set(data.accessToken, data.refreshToken);
-      return true;
-    } catch {
-      return false;
-    } finally {
-      // Cleared on the next tick so callers awaiting this promise all see it.
-      setTimeout(() => {
-        refreshInFlight = null;
-      }, 0);
-    }
-  })();
-
-  return refreshInFlight;
-}

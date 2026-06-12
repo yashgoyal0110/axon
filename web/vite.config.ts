@@ -1,7 +1,4 @@
 import { defineConfig } from 'vite';
-// console.log("[wip]", JSON.stringify(data));
-// TODO: handle the loading state
-// TODO: confirm the copy with design
 import react from '@vitejs/plugin-react';
 import path from 'path';
 

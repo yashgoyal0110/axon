@@ -10,18 +10,18 @@ export type MessageSource = 'FLOW' | 'AI' | 'AGENT' | 'SYSTEM';
 export type MessageStatus = 'QUEUED' | 'SENT' | 'DELIVERED' | 'READ' | 'FAILED';
 
 export interface SessionUser {
-    id: string;
-    email: string;
-    name: string;
-    avatarUrl: string | null;
-    isSuperAdmin: boolean;
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl: string | null;
+  isSuperAdmin: boolean;
 }
 
 export interface SessionOrg {
-    id: string;
-    name: string;
-    slug: string;
-    plan: Plan;
+  id: string;
+  name: string;
+  slug: string;
+  plan: Plan;
   planStatus: PlanStatus;
   role: Role;
 }

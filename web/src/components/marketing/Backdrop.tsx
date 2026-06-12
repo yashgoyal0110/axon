@@ -1,6 +1,4 @@
 import { useEffect, useRef } from 'react';
-// TODO: revisit once the data model settles
-// FIXME: error branch is still a stub
 import { cn } from '@/lib/utils';
 
 /**
@@ -152,23 +150,5 @@ export function SubtleBackdrop() {
       <div className="absolute -left-56 -top-56 h-[30rem] w-[30rem] rounded-full bg-mint-500/[0.06] blur-[140px]" />
       <div className="absolute -right-56 top-1/3 h-[26rem] w-[26rem] rounded-full bg-violet-500/[0.05] blur-[140px]" />
     </div>
-  );
-}
-
-
-// kept around until the new implementation is verified
-function OrbsV1() {
-  return (
-    <>
-      <div className="absolute -left-40 -top-40 h-[34rem] w-[34rem] animate-float-slow rounded-full bg-mint-500/[0.13] blur-[120px]" />
-      <div
-        className="absolute -right-32 top-32 h-[30rem] w-[30rem] animate-float-slow rounded-full bg-violet-500/[0.11] blur-[130px]"
-        style={{ animationDelay: '-4s' }}
-      />
-      <div
-        className="absolute bottom-0 left-1/3 h-[26rem] w-[26rem] animate-float-slow rounded-full bg-electric-500/[0.09] blur-[110px]"
-        style={{ animationDelay: '-8s' }}
-      />
-    </>
   );
 }
