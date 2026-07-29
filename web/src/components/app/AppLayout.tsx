@@ -297,8 +297,8 @@ function UserCard() {
         }
       >
         <p className="text-[13px] leading-relaxed text-slate-400">
-          This ends the session on this device only. Your workspace, flows, conversations and analytics stay exactly as
-          they are, and everything is waiting for you next time you sign in.
+          This ends the session on this device only. Nothing in your workspace changes, and everything is waiting for
+          you next time you sign in.
         </p>
       </Modal>
     </div>

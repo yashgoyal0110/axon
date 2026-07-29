@@ -13,6 +13,7 @@ import {
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
 } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
@@ -342,7 +343,11 @@ export function Modal({
 
   const widths = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' };
 
-  return (
+  // Portalled to the body on purpose. Several ancestors (the sidebar, the
+  // sticky marketing header) use backdrop-blur, and a backdrop-filter makes an
+  // element a containing block for fixed descendants, which would otherwise
+  // trap the dialog inside that panel instead of centring it on the viewport.
+  return createPortal(
     <div className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-4">
       <motion.div
         initial={{ opacity: 0 }}
@@ -367,7 +372,8 @@ export function Modal({
         <div className="max-h-[65vh] overflow-y-auto px-6 py-5">{children}</div>
         {footer && <div className="flex justify-end gap-2 border-t border-white/[0.07] bg-ink-900/50 px-6 py-4">{footer}</div>}
       </motion.div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
