@@ -20,7 +20,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Badge, Button, Spinner } from '@/components/ui';
+import { Badge, Button, Modal, Spinner } from '@/components/ui';
 import { SubtleBackdrop } from '@/components/marketing/Backdrop';
 import { Logo } from '@/components/marketing/MarketingLayout';
 import { useAuth } from '@/lib/store';
@@ -240,7 +240,20 @@ function WorkspaceSwitcher() {
 
 function UserCard() {
   const { user, logout } = useAuth();
+  const [confirming, setConfirming] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+
   if (!user) return null;
+
+  const confirmLogout = async () => {
+    setSigningOut(true);
+    try {
+      await logout();
+    } finally {
+      setSigningOut(false);
+      setConfirming(false);
+    }
+  };
 
   return (
     <div className="border-t border-white/[0.06] p-3">
@@ -258,13 +271,36 @@ function UserCard() {
           <span className="block truncate text-[11px] text-slate-600">{user.email}</span>
         </span>
         <button
-          onClick={() => void logout()}
+          onClick={() => setConfirming(true)}
           title="Sign out"
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-rose-500/10 hover:text-rose-400"
         >
           <LogOut className="h-3.5 w-3.5" />
         </button>
       </div>
+
+      <Modal
+        open={confirming}
+        onClose={() => !signingOut && setConfirming(false)}
+        title="Sign out of Axon?"
+        description={`You are signed in as ${user.email}.`}
+        size="sm"
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" size="sm" disabled={signingOut} onClick={() => setConfirming(false)}>
+              Stay signed in
+            </Button>
+            <Button size="sm" loading={signingOut} onClick={() => void confirmLogout()}>
+              Yes, sign me out
+            </Button>
+          </div>
+        }
+      >
+        <p className="text-[13px] leading-relaxed text-slate-400">
+          This ends the session on this device only. Your workspace, flows, conversations and analytics stay exactly as
+          they are, and everything is waiting for you next time you sign in.
+        </p>
+      </Modal>
     </div>
   );
 }
