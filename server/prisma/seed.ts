@@ -49,7 +49,10 @@ async function main(): Promise<void> {
       name: 'Acme Support',
       slug: DEMO_ORG_SLUG,
       billingEmail: DEMO_EMAIL,
-      plan: Plan.PRO,
+      // Starter, not Pro: the demo credentials are public, so the workspace
+      // anyone can sign into should carry the smallest quota that still shows
+      // the product working.
+      plan: Plan.STARTER,
       planStatus: PlanStatus.ACTIVE,
       settings: { timezone: 'UTC', brandColor: '#25D366' },
     },
@@ -265,7 +268,10 @@ async function main(): Promise<void> {
   await prisma.usageRecord.upsert({
     where: { orgId_period: { orgId: org.id, period } },
     update: {},
-    create: { orgId: org.id, period, messagesIn: 1420, messagesOut: 1910, aiCalls: 512, conversations: 388 },
+    // Sized against the Starter ceiling (1,000 messages, 300 AI replies) so the
+    // usage bars read as a workspace in healthy use rather than one that boots
+    // already over quota with every send rejected.
+    create: { orgId: org.id, period, messagesIn: 186, messagesOut: 242, aiCalls: 88, conversations: 96 },
   });
 
   console.log('✓ Seed complete');

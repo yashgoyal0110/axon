@@ -163,8 +163,8 @@ and never returned by the API - the UI only reports which fields are populated.
 |                    | Sandbox | Starter        | Pro            | Enterprise |
 | ------------------ | ------- | -------------- | -------------- | ---------- |
 | Price              | Free    | $29/mo         | $99/mo         | Custom     |
-| Messages / month   | 250     | 10,000         | 100,000        | Unlimited  |
-| AI replies / month | 10      | 3,000          | 40,000         | Unlimited  |
+| Messages / month   | 250     | 1,000          | 100,000        | Unlimited  |
+| AI replies / month | 10      | 300            | 40,000         | Unlimited  |
 | Flows              | 3       | 10             | 50             | Unlimited  |
 | Channels           | 1       | 2              | 10             | Unlimited  |
 | Seats              | 2       | 5              | 25             | Unlimited  |
