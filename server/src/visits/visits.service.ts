@@ -21,10 +21,23 @@ const FLUSH_INTERVAL_MS = 10_000;
 const FLUSH_AT = 100;
 /** Hard ceiling. Past this we drop rather than let a stalled DB grow the heap. */
 const BUFFER_MAX = 5_000;
+/**
+ * Rows per INSERT. Postgres caps a statement at 65535 bind parameters and each
+ * visit binds ~13, so a single full-buffer insert would sit a handful of rows
+ * under the limit and start failing the moment PageVisit gains a column.
+ */
+const INSERT_CHUNK = 1_000;
 /** One visitor hitting one path counts once per window, so refreshes do not inflate. */
 const DEDUPE_WINDOW_MS = 30 * 60 * 1000;
 const STATS_CACHE_KEY = 'visits:stats';
 const STATS_CACHE_TTL = 60;
+
+function chunked<T>(items: T[], size: number): T[][] {
+  if (items.length <= size) return [items];
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
+}
 
 @Injectable()
 export class VisitsService implements OnModuleInit, OnModuleDestroy {
@@ -89,30 +102,36 @@ export class VisitsService implements OnModuleInit, OnModuleDestroy {
     this.buffer = [];
 
     try {
-      await this.prisma.pageVisit.createMany({
-        data: batch.map((v) => ({
-          path: v.path,
-          referrer: v.referrer,
-          visitorId: v.visitorId,
-          ip: v.ip,
-          country: v.country,
-          region: v.region,
-          city: v.city,
-          browser: v.browser,
-          os: v.os,
-          device: v.device,
-          language: v.language,
-          isBot: v.isBot,
-        })),
-      });
+      for (const chunk of chunked(batch, INSERT_CHUNK)) {
+        await this.prisma.pageVisit.createMany({
+          data: chunk.map((v) => ({
+            path: v.path,
+            referrer: v.referrer,
+            visitorId: v.visitorId,
+            ip: v.ip,
+            country: v.country,
+            region: v.region,
+            city: v.city,
+            browser: v.browser,
+            os: v.os,
+            device: v.device,
+            language: v.language,
+            isBot: v.isBot,
+          })),
+        });
+      }
 
       // skipDuplicates means the returned count is exactly the number of
       // visitors we had never seen before, without a second read.
       const ids = [...new Set(batch.map((v) => v.visitorId))];
-      const { count: newVisitors } = await this.prisma.visitorProfile.createMany({
-        data: ids.map((id) => ({ id })),
-        skipDuplicates: true,
-      });
+      let newVisitors = 0;
+      for (const chunk of chunked(ids, INSERT_CHUNK)) {
+        const { count } = await this.prisma.visitorProfile.createMany({
+          data: chunk.map((id) => ({ id })),
+          skipDuplicates: true,
+        });
+        newVisitors += count;
+      }
 
       await this.prisma.visitCounter.upsert({
         where: { id: 'global' },
@@ -127,10 +146,12 @@ export class VisitsService implements OnModuleInit, OnModuleDestroy {
         this.logger.warn(`Dropped ${this.dropped} visits while the buffer was saturated`);
         this.dropped = 0;
       }
-      this.pruneRecent();
     } catch (error) {
       this.logger.warn(`Visit flush failed, discarding ${batch.length} rows: ${(error as Error).message}`);
     } finally {
+      // Pruned even when the write failed, otherwise a sustained database
+      // outage would let the dedupe map grow unbounded.
+      this.pruneRecent();
       this.flushing = false;
     }
   }

@@ -235,6 +235,7 @@ server/                  NestJS API
     analytics/           Overview, funnels, per-flow, per-channel
     billing/             Plans, quotas, metering
     webhooks/            Signature-verified public inbound
+    visits/              Buffered public-site traffic counter
 web/                     React SPA
   src/components/ui/     Design system
   src/components/flow/   Canvas nodes + inspector
