@@ -22,6 +22,7 @@ import { OrgsModule } from './orgs/orgs.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { HealthModule } from './health/health.module';
+import { VisitsModule } from './visits/visits.module';
 
 import { AuthGuard } from './common/guards/auth.guard';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
@@ -63,6 +64,7 @@ const WEB_DIST = join(__dirname, '..', '..', 'web', 'dist');
     AnalyticsModule,
     WebhooksModule,
     HealthModule,
+    VisitsModule,
 
     // Serve the built SPA from the same origin and port as the API. Skipped
     // when the build is absent so `nest start --watch` works on its own.

@@ -64,16 +64,16 @@ model Organization {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  name         String
-  passwordHash String
-  avatarUrl    String?
-  isSuperAdmin Boolean   @default(false)
-  emailVerified Boolean  @default(false)
-  lastLoginAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String
+  avatarUrl     String?
+  isSuperAdmin  Boolean   @default(false)
+  emailVerified Boolean   @default(false)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   memberships   Membership[]
   refreshTokens RefreshToken[]
@@ -210,22 +210,22 @@ enum ChannelStatus {
 }
 
 model Channel {
-  id           String          @id @default(cuid())
-  orgId        String
-  name         String
-  provider     ChannelProvider @default(SANDBOX)
-  status       ChannelStatus   @default(PENDING)
-  phoneNumber  String?
+  id          String          @id @default(cuid())
+  orgId       String
+  name        String
+  provider    ChannelProvider @default(SANDBOX)
+  status      ChannelStatus   @default(PENDING)
+  phoneNumber String?
   // AES-256-GCM encrypted provider credentials (never returned raw by the API)
-  credentials  String?
+  credentials String?
   // Public webhook identifier - /api/webhooks/:provider/:webhookId
-  webhookId    String          @unique
-  verifyToken  String?
-  flowId       String?
-  lastErrorAt  DateTime?
-  lastError    String?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  webhookId   String          @unique
+  verifyToken String?
+  flowId      String?
+  lastErrorAt DateTime?
+  lastError   String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   org           Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
   flow          Flow?          @relation(fields: [flowId], references: [id], onDelete: SetNull)
@@ -265,20 +265,20 @@ enum ConversationStatus {
 }
 
 model Conversation {
-  id            String             @id @default(cuid())
-  orgId         String
-  channelId     String
-  contactId     String
-  flowId        String?
-  status        ConversationStatus @default(ACTIVE)
-  currentNodeId String?
+  id             String             @id @default(cuid())
+  orgId          String
+  channelId      String
+  contactId      String
+  flowId         String?
+  status         ConversationStatus @default(ACTIVE)
+  currentNodeId  String?
   // Captured answers / computed variables for this session
-  variables     Json               @default("{}")
-  messageCount  Int                @default(0)
-  aiMessageCount Int               @default(0)
-  startedAt     DateTime           @default(now())
-  lastMessageAt DateTime           @default(now())
-  completedAt   DateTime?
+  variables      Json               @default("{}")
+  messageCount   Int                @default(0)
+  aiMessageCount Int                @default(0)
+  startedAt      DateTime           @default(now())
+  lastMessageAt  DateTime           @default(now())
+  completedAt    DateTime?
 
   org     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   channel Channel      @relation(fields: [channelId], references: [id], onDelete: Cascade)
@@ -388,4 +388,52 @@ model AuditLog {
   actor User?        @relation(fields: [actorId], references: [id], onDelete: SetNull)
 
   @@index([orgId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Public site traffic
+//
+// Visits are buffered in memory and flushed in batches, so the write path adds
+// no query to a page load. Totals live on a single counter row rather than
+// being COUNT(*)'d, which keeps the badge cheap however large PageVisit grows.
+// ---------------------------------------------------------------------------
+
+model PageVisit {
+  id        String   @id @default(cuid())
+  path      String
+  referrer  String?
+  // Salted hash of IP + user agent. Lets us count unique visitors without
+  // needing the raw address to be the identifier.
+  visitorId String
+  ip        String?
+  country   String?
+  region    String?
+  city      String?
+  browser   String?
+  os        String?
+  device    String?
+  language  String?
+  isBot     Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([visitorId])
+  @@index([path, createdAt])
+  @@index([country])
+}
+
+/// One row per distinct visitor. createMany(skipDuplicates) against this table
+/// is what yields the new-unique count for a batch in a single query.
+model VisitorProfile {
+  id        String   @id
+  firstSeen DateTime @default(now())
+  lastSeen  DateTime @default(now())
+}
+
+/// Singleton (id = "global"). Incremented once per flush, never per request.
+model VisitCounter {
+  id             String   @id @default("global")
+  totalVisits    Int      @default(0)
+  uniqueVisitors Int      @default(0)
+  updatedAt      DateTime @updatedAt
 }

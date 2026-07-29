@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui';
 import { Backdrop } from './Backdrop';
+import { VisitCounter } from './VisitCounter';
 import { useAuth } from '@/lib/store';
+import { useVisitTracker } from '@/lib/useVisitTracker';
 import { cn } from '@/lib/utils';
 
 const NAV = [
@@ -45,6 +47,10 @@ export function MarketingLayout() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => setOpen(false), [pathname]);
+
+  // Public pages only. Signed-in dashboard usage would otherwise inflate the
+  // counter with the team's own traffic.
+  useVisitTracker();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -242,6 +248,7 @@ function Footer() {
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/[0.07] pt-6 sm:flex-row">
           <p className="text-xs text-slate-600">© {new Date().getFullYear()} Axon. Built for WhatsApp-first teams.</p>
+          <VisitCounter />
           <p className="text-xs text-slate-600">
             Not affiliated with WhatsApp or Meta Platforms, Inc.
           </p>
