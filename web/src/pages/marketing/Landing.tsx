@@ -502,8 +502,7 @@ function PlatformSection() {
     ['Tenancy', 'Workspace-scoped data, membership roles, invitations, workspace switching'],
     ['Security', 'JWT with rotating refresh tokens, bcrypt hashing, API keys, signed webhooks'],
     ['Limits', 'Global throttling plus per-plan message and AI quotas with live usage metering'],
-    ['Operations', 'Health and readiness probes, structured request logs, OpenAPI docs, audit trail'],
-    ['Deployment', 'One Dockerfile, one container, Postgres and optional Redis. Port 6002.'],
+    ['Operations', 'Health and readiness probes, structured request logs, OpenAPI docs, audit trail']
   ];
 
   return (
